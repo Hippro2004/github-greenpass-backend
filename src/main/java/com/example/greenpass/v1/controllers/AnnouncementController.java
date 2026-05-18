@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
@@ -14,7 +15,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/announcement")
@@ -50,7 +50,7 @@ public class AnnouncementController {
             if (announcement == null) {
                 return new ResponseEntity<>(
                         new ResponseObject(false, "Announcement research isn't success", null),
-                        HttpStatus.NO_CONTENT);
+                        HttpStatus.NOT_FOUND);
 
             }
             return new ResponseEntity<>(new ResponseObject(true, "Announcement fetched successfully", announcement),
