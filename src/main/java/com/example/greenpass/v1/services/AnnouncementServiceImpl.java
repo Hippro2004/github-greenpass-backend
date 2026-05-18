@@ -19,4 +19,9 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         return announcementRepository.findAll();
     }
 
+    @Override
+    public Announcement getAnnouncementById(Long id) {
+        return announcementRepository.findById(id).orElse(null);
+    }
+
 }

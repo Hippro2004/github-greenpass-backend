@@ -14,6 +14,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/announcement")
@@ -27,7 +28,7 @@ public class AnnouncementController {
             List<Announcement> announcements = announcementService.getAllAnnouncements();
             if (announcements.isEmpty()) {
                 return new ResponseEntity<>(
-                        new ResponseObject(false, "Announcements research is success", null),
+                        new ResponseObject(false, "Announcements research isn't success", null),
                         HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity<>(new ResponseObject(true, "Announcements fetched successfully", announcements),
@@ -39,6 +40,27 @@ public class AnnouncementController {
 
         }
 
+    }
+
+    @GetMapping("/announcement-details")
+    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam Long id) {
+        try {
+            Announcement announcement = announcementService.getAnnouncementById(id);
+
+            if (announcement == null) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "Announcement research isn't success", null),
+                        HttpStatus.NO_CONTENT);
+
+            }
+            return new ResponseEntity<>(new ResponseObject(true, "Announcement fetched successfully", announcement),
+                    HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to get announcements", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
     }
 
 }
