@@ -20,7 +20,7 @@ public class UploadService {
         Map<String, Object> uploadResult = cloudinary.uploader().upload(
                 file.getBytes(),
                 ObjectUtils.emptyMap());
-        return uploadResult.get("secure_url").toString();
+        return (String) uploadResult.get("secure_url");
     }
 
 }

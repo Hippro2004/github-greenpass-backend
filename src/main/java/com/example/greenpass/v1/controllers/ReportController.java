@@ -15,7 +15,6 @@ import com.example.greenpass.v1.entities.Report;
 import com.example.greenpass.v1.services.ReportService;
 
 import jakarta.validation.Valid;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/report")
 @RequiredArgsConstructor
-@Builder
 public class ReportController {
     private final ReportService reportService;
     // private final UserService userService;
