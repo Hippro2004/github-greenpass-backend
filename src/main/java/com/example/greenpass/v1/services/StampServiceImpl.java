@@ -45,4 +45,9 @@ public class StampServiceImpl implements StampService {
         stampRepository.save(newStamp);
     }
 
+    @Override
+    public List<Stamp> getAllStampsByUsernameAndParkId(String username, int parkId) {
+        return stampRepository.findAllByUserUsernameAndParkParkId(username, parkId);
+    }
+
 }

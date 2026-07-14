@@ -9,5 +9,5 @@ import com.example.greenpass.v1.entities.Stamp;
 public interface StampRepository extends JpaRepository<Stamp, Integer> {
     List<Stamp> findAllByUserUsername(String username);
 
-    Stamp findByUserUsernameAndParkParkId(String username, int parkId);
+    List<Stamp> findAllByUserUsernameAndParkParkId(String username, int parkId);
 }

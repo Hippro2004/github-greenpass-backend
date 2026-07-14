@@ -10,4 +10,6 @@ public interface StampService {
     Stamp getStampById(int id);
 
     void StampUser(String username, String parkRangerUsername);
+
+    List<Stamp> getAllStampsByUsernameAndParkId(String username, int parkId);
 }

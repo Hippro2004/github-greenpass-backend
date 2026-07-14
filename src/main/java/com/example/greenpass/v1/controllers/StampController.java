@@ -20,6 +20,7 @@ import com.example.greenpass.v1.services.QRService;
 import com.example.greenpass.v1.services.StampService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/stamp")
@@ -84,4 +85,18 @@ public class StampController {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/stamp-details")
+    public ResponseEntity<ResponseObject> getStampDetails(@RequestHeader("username") String username, int parkId) {
+        try {
+            List<Stamp> histories = stampService.getAllStampsByUsernameAndParkId(username, parkId);
+            return new ResponseEntity<>(new ResponseObject(true, "Success", histories), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to ", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
