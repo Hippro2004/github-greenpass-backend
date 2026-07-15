@@ -20,7 +20,6 @@ import com.example.greenpass.v1.services.QRService;
 import com.example.greenpass.v1.services.StampService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/stamp")
