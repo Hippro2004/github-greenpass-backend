@@ -11,4 +11,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAllByUserUsername(String username);
 
     Optional<Report> findByUserUsername(String username);
+
+    Optional<Report> findByReportId(Long id);
 }

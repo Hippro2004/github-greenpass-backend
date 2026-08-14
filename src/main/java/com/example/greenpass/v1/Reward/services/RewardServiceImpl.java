@@ -21,7 +21,7 @@ public class RewardServiceImpl implements RewardService {
 
     @Override
     public Reward getRewardById(int id) {
-        return rewardRepository.findByRewardId(id).orElseThrow();
+        return rewardRepository.findByRewardId(id).orElse(null);
     }
 
 }

@@ -27,7 +27,7 @@ public class RewardController {
         try {
             List<Reward> rewards = rewardService.getAllReward();
 
-            if (rewards == null || rewards.isEmpty()) {
+            if (rewards == null) {
                 return new ResponseEntity<>(new ResponseObject(false, "Reward is not found", null),
                         HttpStatus.NOT_FOUND);
 
