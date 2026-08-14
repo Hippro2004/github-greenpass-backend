@@ -14,7 +14,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/reward")
@@ -27,11 +27,13 @@ public class RewardController {
         try {
             List<Reward> rewards = rewardService.getAllReward();
 
-            if (rewards != null && !rewards.isEmpty()) {
-                return new ResponseEntity<>(new ResponseObject(true, "Reward found", rewards), HttpStatus.OK);
+            if (rewards == null || rewards.isEmpty()) {
+                return new ResponseEntity<>(new ResponseObject(false, "Reward is not found", null),
+                        HttpStatus.NOT_FOUND);
 
             }
-            return new ResponseEntity<>(new ResponseObject(false, "Reward is not found", null), HttpStatus.NOT_FOUND);
+
+            return new ResponseEntity<>(new ResponseObject(true, "Reward found", rewards), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to retrieve rewards", null),
@@ -40,11 +42,16 @@ public class RewardController {
         }
     }
 
-    @GetMapping("/reward-id")
-    public ResponseEntity<ResponseObject> getRewardById(@RequestParam int id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseObject> getRewardById(@PathVariable int id) {
         try {
             Reward reward = rewardService.getRewardById(id);
-            return new ResponseEntity<>(new ResponseObject(true, "Reward is found by id", reward), HttpStatus.OK);
+            if (reward == null) {
+                return new ResponseEntity<>(new ResponseObject(false, "Reward not found", reward),
+                        HttpStatus.NOT_FOUND);
+
+            }
+            return new ResponseEntity<>(new ResponseObject(true, "Reward found", reward), HttpStatus.OK);
 
         } catch (Exception e) {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to retrieve reward by id ", null),
