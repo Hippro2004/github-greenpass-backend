@@ -30,5 +30,4 @@ public class ParkServiceImpl implements ParkService {
         return parkRepository.findByNameContainingIgnoreCase(keyword);
     }
 
-
 }

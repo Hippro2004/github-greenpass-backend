@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
+import com.example.greenpass.v1.dtos.SearchParkDto;
 import com.example.greenpass.v1.entities.Park;
 import com.example.greenpass.v1.services.ParkService;
 
@@ -26,12 +27,29 @@ public class ParkController {
             @RequestParam(defaultValue = "") String keyword) {
         try {
             List<Park> parks = parkService.searchByName(keyword);
+            List<SearchParkDto> parkDtos = parks.stream()
+                    .map(p -> new SearchParkDto(
+                            p.getParkId(),
+                            p.getName(),
+                            p.getImage(),
+                            p.getAddress(),
+                            p.getLocation(),
+                            p.getDescription(),
+                            p.getOpenTime(),
+                            p.getCloseTime(),
+                            p.isSeasonalPark(),
+                            p.getSeasonOpenDate(),
+                            p.getSeasonCloseDate(),
+                            p.isTemporaryClosed(),
+                            p.getEventNote(),
+                            p.getStatus()))
+                    .toList();
             // ResponseObject responseObject = new ResponseObject(true, "Success", parks);
             // ResponseEntity<ResponseObject> responseEntity = new
             // ResponseEntity<>(responseObject, HttpStatus.OK);
             // return responseEntity;
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Success", parks),
+                    new ResponseObject(true, "Success", parkDtos),
                     HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

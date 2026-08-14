@@ -2,6 +2,9 @@ package com.example.greenpass.v1.entities;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +38,7 @@ public class Stamp {
 
     @ManyToOne
     @JoinColumn(name = "parkId", nullable = false)
+    @JsonBackReference(value = "park-stamps")
     private Park park;
 
     @ManyToOne

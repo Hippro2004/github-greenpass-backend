@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -66,9 +68,11 @@ public class Park {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "parkId")
+    @JsonManagedReference(value = "park-stamps")
     private List<Stamp> stamps = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "park")
+    @JsonManagedReference(value = "park-rangers")
     private List<ParkRanger> parkRangers = new ArrayList<>();
 
 }

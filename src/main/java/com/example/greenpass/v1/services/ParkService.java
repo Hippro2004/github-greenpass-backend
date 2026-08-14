@@ -2,6 +2,7 @@ package com.example.greenpass.v1.services;
 
 import java.util.List;
 
+import com.example.greenpass.v1.dtos.SearchParkDto;
 import com.example.greenpass.v1.entities.Park;
 
 public interface ParkService {
