@@ -2,6 +2,7 @@ package com.example.greenpass.v1.User.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import com.example.greenpass.v1.User.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -48,7 +50,6 @@ public class UserController {
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(new ResponseObject(false, "Failed to create user", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -71,7 +72,6 @@ public class UserController {
                     HttpStatus.NOT_FOUND);
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(new ResponseObject(false, "Failed to Login",
                     null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
