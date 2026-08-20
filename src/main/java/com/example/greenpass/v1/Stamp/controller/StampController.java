@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.Stamp.dtos.QrResponse;
 import com.example.greenpass.v1.Stamp.dtos.ScanQrDto;
+import com.example.greenpass.v1.Stamp.dtos.StampResponse;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
 import com.example.greenpass.v1.Stamp.services.JwtService;
 import com.example.greenpass.v1.Stamp.services.QRService;
@@ -75,13 +76,21 @@ public class StampController {
     @GetMapping("/my-stamps")
     public ResponseEntity<ResponseObject> getMyStamps(@RequestHeader("username") String username) {
         try {
-            List<Stamp> stamps = stampService.getAllStampsByUsername(username);
+            List<Stamp> rawStamps = stampService.getAllStampsByUsername(username);
+            List<StampResponse> stamps = rawStamps.stream()
+                    .filter(stamp -> stamp != null && stamp.getPark() != null)
+                    .map(stamp -> new StampResponse(
+                            stamp.getStampId(),
+                            stamp.getStampDate(),
+                            stamp.getPark().getParkId(),
+                            stamp.getPark().getName()))
+                    .toList();
             return new ResponseEntity<>(
                     new ResponseObject(true, "Success", stamps),
                     HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(
-                    new ResponseObject(false, "Failed to ", null),
+                    new ResponseObject(false, "Failed to load stamps", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
