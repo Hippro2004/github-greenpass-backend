@@ -16,5 +16,7 @@ public class ReportResponse {
     private String description;
     private String status;
     private LocalDate reportDate;
+    private int parkId;
+    private String parkName;
 
 }

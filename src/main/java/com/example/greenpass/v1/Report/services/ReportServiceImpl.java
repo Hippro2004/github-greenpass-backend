@@ -30,7 +30,12 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<ReportResponse> getAllByUsername(String username) {
         return reportRepository.findAllByUserUsername(username).stream()
-                .map(r -> new ReportResponse(r.getName(), r.getDescription(), r.getStatus(), r.getReportDate()))
+                .map(r -> new ReportResponse(r.getName(),
+                        r.getDescription(),
+                        r.getStatus(),
+                        r.getReportDate(),
+                        r.getPark().getParkId(),
+                        r.getPark().getName()))
                 .toList();
 
     }
