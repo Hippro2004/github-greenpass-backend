@@ -19,11 +19,12 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     @Override
     public void addReplyReport(ReplyReport replyReport, Report report) {
         ReplyReport addReplyReport = ReplyReport.builder()
-                .updateDate(report.getReportDate()).progress(null)
-                .currentStatus("Pending")
-                .image(report.getImage())
-                .report(report)
-                .parkRanger(null)
+                .updateDate(replyReport.getUpdateDate())
+                .progress(replyReport.getProgress())
+                .currentStatus(replyReport.getCurrentStatus())
+                .image(replyReport.getImage())
+                .report(replyReport.getReport())
+                .parkRanger(replyReport.getParkRanger())
                 .build();
         replyReporyRepository.save(addReplyReport);
     }

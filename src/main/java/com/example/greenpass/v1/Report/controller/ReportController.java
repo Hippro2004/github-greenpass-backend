@@ -51,7 +51,7 @@ public class ReportController {
     public ResponseEntity<ResponseObject> addReport(@RequestHeader("username") String username,
             @RequestBody @Valid AddReportDto addReportDto) {
         try {
-            reportService.addReport(addReportDto);
+            reportService.addReport(addReportDto, username);
             return new ResponseEntity<>(new ResponseObject(true, "Add Report Success", null),
                     HttpStatus.CREATED);
 

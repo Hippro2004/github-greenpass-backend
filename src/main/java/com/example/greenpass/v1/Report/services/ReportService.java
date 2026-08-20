@@ -11,7 +11,7 @@ public interface ReportService {
 
     Report getByUsername(String name);
 
-    void addReport(AddReportDto addReportDto);
+    void addReport(AddReportDto addReportDto, String username);
 
     Report getByReportId(Long id);
 
