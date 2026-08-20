@@ -1,5 +1,7 @@
 package com.example.greenpass.v1.Report.dtos;
 
+import java.time.LocalDate;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +15,6 @@ public class ReportResponse {
     private String name;
     private String description;
     private String status;
+    private LocalDate reportDate;
 
 }

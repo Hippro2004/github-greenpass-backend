@@ -13,6 +13,6 @@ public interface ReportService {
 
     void addReport(AddReportDto addReportDto, String username);
 
-    Report getByReportId(Long id);
+    Report getByReportId(int id);
 
 }

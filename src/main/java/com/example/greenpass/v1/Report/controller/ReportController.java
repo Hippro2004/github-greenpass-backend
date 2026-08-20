@@ -34,10 +34,11 @@ public class ReportController {
 
             List<ReportResponse> reports = reportService.getAllByUsername(username);
 
-            if (reports.isEmpty()) {
-                return new ResponseEntity<>(new ResponseObject(false, "Reports not found", null), HttpStatus.NOT_FOUND);
+            // if (reports == null || reports.isEmpty()) {
+            // return new ResponseEntity<>(new ResponseObject(false, "Reports not found",
+            // null), HttpStatus.NOT_FOUND);
 
-            }
+            // }
 
             return new ResponseEntity<>(new ResponseObject(true, "Reports found", reports), HttpStatus.OK);
         } catch (Exception e) {
@@ -63,7 +64,7 @@ public class ReportController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseObject> getReportById(@PathVariable Long id) {
+    public ResponseEntity<ResponseObject> getReportById(@PathVariable int id) {
         try {
             Report report = reportService.getByReportId(id);
             if (report == null) {

@@ -34,13 +34,11 @@ public class ReplyReport {
     @Column(nullable = false)
     private LocalDate updateDate;
 
-    @Column(nullable = false)
     private String progress;
 
     @Column(nullable = false)
     private String currentStatus;
 
-    @Column(nullable = false)
     private String image;
 
     @ManyToOne

@@ -12,7 +12,7 @@ import lombok.Setter;
 public class AddReportDto {
     private String name;
     private String description;
-    private String status;
     private String image;
+    private int parkId;
 
 }

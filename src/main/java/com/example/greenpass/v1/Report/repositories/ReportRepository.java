@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.greenpass.v1.Report.entities.Report;
 
-public interface ReportRepository extends JpaRepository<Report, Long> {
+public interface ReportRepository extends JpaRepository<Report, Integer> {
     List<Report> findAllByUserUsername(String username);
 
     Optional<Report> findByUserUsername(String username);
 
-    Optional<Report> findByReportId(Long id);
+    Optional<Report> findByReportId(int id);
 }
