@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,7 +87,9 @@ public class StampController {
     }
 
     @GetMapping("/stamp-details")
-    public ResponseEntity<ResponseObject> getStampDetails(@RequestHeader("username") String username, int parkId) {
+    public ResponseEntity<ResponseObject> getStampDetails(
+            @RequestHeader("username") String username,
+            @RequestParam("parkId") int parkId) {
         try {
             List<Stamp> histories = stampService.getAllStampsByUsernameAndParkId(username, parkId);
             return new ResponseEntity<>(new ResponseObject(true, "Success", histories), HttpStatus.OK);
