@@ -48,7 +48,7 @@ public class ReplyReport {
     private Report report;
 
     @ManyToOne
-    @JoinColumn(name = "parkRangerId", nullable = false)
+    @JoinColumn(name = "parkRangerId")
     private ParkRanger parkRanger;
 
 }
