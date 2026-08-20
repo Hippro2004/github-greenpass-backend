@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
 import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.repositories.AnnouncementRepository;
 
@@ -12,15 +13,23 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AnnouncementServiceImpl implements AnnouncementService {
-    private AnnouncementRepository announcementRepository;
+    private final AnnouncementRepository announcementRepository;
 
     @Override
-    public List<Announcement> getAllAnnouncements() {
-        return announcementRepository.findAll();
+    public List<AnnouncementResponse> getAllAnnouncements() {
+        return announcementRepository.findAll().stream()
+                .filter(announcement -> announcement != null && announcement.getPark() != null)
+                .map(announcement -> new AnnouncementResponse(
+                        announcement.getAnnouncementId(),
+                        announcement.getAnnouncementTitle(),
+                        announcement.getPostDate(),
+                        announcement.getDescription(),
+                        announcement.getPark().getName()))
+                .toList();
     }
 
     @Override
-    public Announcement getAnnouncementById(Long id) {
+    public Announcement getAnnouncementById(int id) {
         return announcementRepository.findById(id).orElse(null);
     }
 

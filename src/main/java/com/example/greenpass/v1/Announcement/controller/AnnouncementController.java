@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
+import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
 import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.services.AnnouncementService;
 
@@ -25,7 +26,7 @@ public class AnnouncementController {
     @GetMapping("/all-announcement")
     public ResponseEntity<ResponseObject> getAllAnnouncements() {
         try {
-            List<Announcement> announcements = announcementService.getAllAnnouncements();
+            List<AnnouncementResponse> announcements = announcementService.getAllAnnouncements();
             if (announcements.isEmpty()) {
                 return new ResponseEntity<>(
                         new ResponseObject(false, "Announcements research isn't success", null),
@@ -43,7 +44,7 @@ public class AnnouncementController {
     }
 
     @GetMapping("/announcement-details")
-    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam Long id) {
+    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam int id) {
         try {
             Announcement announcement = announcementService.getAnnouncementById(id);
 
