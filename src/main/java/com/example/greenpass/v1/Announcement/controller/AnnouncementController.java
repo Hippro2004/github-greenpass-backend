@@ -44,7 +44,7 @@ public class AnnouncementController {
     }
 
     @GetMapping("/announcement-details")
-    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam int id) {
+    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam("parkId") int id) {
         try {
             Announcement announcement = announcementService.getAnnouncementById(id);
 
