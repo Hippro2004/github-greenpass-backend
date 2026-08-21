@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
-import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.services.AnnouncementService;
 
 import lombok.RequiredArgsConstructor;
@@ -44,9 +43,9 @@ public class AnnouncementController {
     }
 
     @GetMapping("/announcement-details")
-    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam("parkId") int id) {
+    public ResponseEntity<ResponseObject> getAnnouncementDetails(@RequestParam("announcementId") int id) {
         try {
-            Announcement announcement = announcementService.getAnnouncementById(id);
+            AnnouncementResponse announcement = announcementService.getAnnouncementById(id);
 
             if (announcement == null) {
                 return new ResponseEntity<>(

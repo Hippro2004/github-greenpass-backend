@@ -29,8 +29,14 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    public Announcement getAnnouncementById(int id) {
-        return announcementRepository.findById(id).orElse(null);
+    public AnnouncementResponse getAnnouncementById(int id) {
+        Announcement announcement = announcementRepository.findById(id).orElse(null);
+        return new AnnouncementResponse(
+                announcement.getAnnouncementId(),
+                announcement.getAnnouncementTitle(),
+                announcement.getPostDate(),
+                announcement.getDescription(),
+                announcement.getPark().getName());
     }
 
 }
