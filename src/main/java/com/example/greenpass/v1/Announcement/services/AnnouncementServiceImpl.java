@@ -5,13 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.beust.ah.A;
 import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
 import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.repositories.AnnouncementRepository;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 
 @Service
