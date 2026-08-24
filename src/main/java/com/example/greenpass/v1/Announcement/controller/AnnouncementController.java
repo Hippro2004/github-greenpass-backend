@@ -5,9 +5,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
+import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
+import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.services.AnnouncementService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -15,6 +18,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/announcement")
@@ -53,6 +58,7 @@ public class AnnouncementController {
                         HttpStatus.NOT_FOUND);
 
             }
+
             return new ResponseEntity<>(new ResponseObject(true, "Announcement fetched successfully", announcement),
                     HttpStatus.OK);
 
@@ -60,6 +66,22 @@ public class AnnouncementController {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to get announcements", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
 
+        }
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<ResponseObject> addAnnouncement(@RequestBody @Valid AddAnnouncementDto dto) {
+        try {
+            Announcement announcement = announcementService.addAnnouncement(dto);
+
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "Announcement created successfully", announcement),
+                    HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to create announcement", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

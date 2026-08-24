@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Announcement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +38,9 @@ public class Announcement {
 
     @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
+    private String image;
 
     @ManyToOne
     @JoinColumn(name = "parkId", nullable = false)
