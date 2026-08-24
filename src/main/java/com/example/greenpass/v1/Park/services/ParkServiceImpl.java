@@ -30,4 +30,9 @@ public class ParkServiceImpl implements ParkService {
         return parkRepository.findByNameContainingIgnoreCase(keyword);
     }
 
+    @Override
+    public Park saveOrUpdatePark(Park park) {
+        return parkRepository.save(park);
+    }
+
 }

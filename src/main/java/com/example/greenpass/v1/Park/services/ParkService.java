@@ -10,4 +10,6 @@ public interface ParkService {
     List<Park> getAllParkByKeyword(String keyword);
 
     List<Park> searchByName(String keyword);
+
+    Park saveOrUpdatePark(Park park);
 }
