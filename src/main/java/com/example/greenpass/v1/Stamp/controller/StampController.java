@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.Stamp.dtos.QrResponse;
-import com.example.greenpass.v1.Stamp.dtos.ScanQrDto;
 import com.example.greenpass.v1.Stamp.dtos.StampResponse;
+import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
 import com.example.greenpass.v1.Stamp.services.JwtService;
 import com.example.greenpass.v1.Stamp.services.QRService;
@@ -52,26 +50,27 @@ public class StampController {
         }
     }
 
-    @PostMapping("/scan")
-    public ResponseEntity<ResponseObject> scanQr(@RequestBody ScanQrDto scanQrDto) {
-        try {
-            if (jwtService.isTokenExpired(scanQrDto.getToken())) {
-                return new ResponseEntity<>(
-                        new ResponseObject(false, "QR หมดอายุแล้ว", null),
-                        HttpStatus.UNAUTHORIZED);
-            }
+    // @PostMapping("/scan")
+    // public ResponseEntity<ResponseObject> scanQr(@RequestBody ScanQrDto
+    // scanQrDto) {
+    // try {
+    // if (jwtService.isTokenExpired(scanQrDto.getToken())) {
+    // return new ResponseEntity<>(
+    // new ResponseObject(false, "QR หมดอายุแล้ว", null),
+    // HttpStatus.UNAUTHORIZED);
+    // }
 
-            // String userId = jwtService.extractUserId(scanQrDto.getToken());
+    // // String userId = jwtService.extractUserId(scanQrDto.getToken());
 
-            return new ResponseEntity<>(
-                    new ResponseObject(true, "ประทับแสตมป์สำเร็จ", null),
-                    HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    new ResponseObject(false, "เกิดข้อผิดพลาด", null),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // return new ResponseEntity<>(
+    // new ResponseObject(true, "ประทับแสตมป์สำเร็จ", null),
+    // HttpStatus.OK);
+    // } catch (Exception e) {
+    // return new ResponseEntity<>(
+    // new ResponseObject(false, "เกิดข้อผิดพลาด", null),
+    // HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+    // }
 
     @GetMapping("/my-stamps")
     public ResponseEntity<ResponseObject> getMyStamps(@RequestHeader("username") String username) {
@@ -106,6 +105,21 @@ public class StampController {
         } catch (Exception e) {
             return new ResponseEntity<>(
                     new ResponseObject(false, "Failed to ", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<ResponseObject> getStatistics() {
+        try {
+            VisitStatisticsResponse stats = stampService.getVisitStatistics();
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "Fetch visit statistics successfully", stats),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to fetch visit statistics", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

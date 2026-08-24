@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ScanQrDto {
     private String token;
     private Integer parkRangerId;
+    private String parkRangerUsername;
 }
