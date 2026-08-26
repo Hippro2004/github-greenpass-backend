@@ -31,12 +31,12 @@ public class SearchParkDto {
 
     private LocalTime closeTime;
 
-    private boolean isSeasonalPark;
+    private Boolean isSeasonalPark;
 
     private LocalDate seasonOpenDate;
     private LocalDate seasonCloseDate;
 
-    private boolean isTemporaryClosed;
+    private Boolean isTemporaryClosed;
 
     private String eventNote;
 

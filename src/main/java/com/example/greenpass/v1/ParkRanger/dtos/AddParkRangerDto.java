@@ -1,12 +1,16 @@
 package com.example.greenpass.v1.ParkRanger.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddParkRangerDto {
 
     private String username;
@@ -19,11 +23,16 @@ public class AddParkRangerDto {
     private String district;
     private String subDistrict;
     private String province;
-    private int gender;
+    private Integer gender;
     private String phone;
     private String email;
     private String zipcode;
 
-    private int parkId;
+    private Integer parkId;
+
+    private Boolean canAnnouncement;
+    private Boolean canIssueStamp;
+    private Boolean canProgressReport;
+    private Boolean canEditParkDetails;
 
 }

@@ -32,6 +32,21 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     public Park saveOrUpdatePark(Park park) {
+        if (park.getParkId() != null) {
+            Park existing = parkRepository.findById(park.getParkId()).orElse(null);
+            if (existing != null) {
+                if (park.getName() != null) existing.setName(park.getName());
+                if (park.getImage() != null) existing.setImage(park.getImage());
+                if (park.getAddress() != null) existing.setAddress(park.getAddress());
+                if (park.getLocation() != null) existing.setLocation(park.getLocation());
+                if (park.getDescription() != null) existing.setDescription(park.getDescription());
+                if (park.getOpenTime() != null) existing.setOpenTime(park.getOpenTime());
+                if (park.getCloseTime() != null) existing.setCloseTime(park.getCloseTime());
+                if (park.getEventNote() != null) existing.setEventNote(park.getEventNote());
+                if (park.getStatus() != null) existing.setStatus(park.getStatus());
+                return parkRepository.save(existing);
+            }
+        }
         return parkRepository.save(park);
     }
 
