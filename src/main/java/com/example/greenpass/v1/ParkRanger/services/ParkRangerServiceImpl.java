@@ -17,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ParkRangerServiceImpl implements ParkRangerService {
 
-    private ParkRangerRepository parkRangerRepository;
-    private ParkService parkService;
+    private final ParkRangerRepository parkRangerRepository;
+    private final ParkService parkService;
 
     @Override
     public ParkRanger getParkRangerByUsername(String username) {

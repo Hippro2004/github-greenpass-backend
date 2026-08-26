@@ -68,6 +68,18 @@ public class RewardController {
 
     }
 
+    @PostMapping("/add")
+    public ResponseEntity<ResponseObject> addReward(@RequestBody @Valid AddRewardDto dto) {
+        try {
+            Reward newReward = rewardService.addReward(dto);
+            return new ResponseEntity<>(new ResponseObject(true, "Add Reward Successfully", newReward), HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to Add Reward", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/update")
     public ResponseEntity<ResponseObject> updateReward(@RequestParam("id") int id,
             @RequestBody @Valid AddRewardDto dto) {
