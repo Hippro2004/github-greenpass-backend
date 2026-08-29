@@ -27,13 +27,15 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     public List<AnnouncementResponse> getAllAnnouncements() {
         return announcementRepository.findAll().stream()
                 .filter(announcement -> announcement != null && announcement.getPark() != null)
+                .sorted((a, b) -> Integer.compare(b.getAnnouncementId(), a.getAnnouncementId()))
                 .map(announcement -> new AnnouncementResponse(
                         announcement.getAnnouncementId(),
                         announcement.getAnnouncementTitle(),
                         announcement.getPostDate(),
                         announcement.getDescription(),
                         announcement.getPark().getName(),
-                        announcement.getPark().getParkId()))
+                        announcement.getPark().getParkId(),
+                        announcement.getImage()))
                 .toList();
     }
 
@@ -47,7 +49,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                 announcement.getPostDate(),
                 announcement.getDescription(),
                 announcement.getPark() != null ? announcement.getPark().getName() : "อุทยานแห่งชาติ",
-                announcement.getPark() != null ? announcement.getPark().getParkId() : 1);
+                announcement.getPark() != null ? announcement.getPark().getParkId() : 1,
+                announcement.getImage());
     }
 
     @Override
@@ -74,10 +77,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
         String image = "src/news1.jpg";
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            String trimmed = dto.getImage().trim();
-            if (trimmed.length() <= 255) {
-                image = trimmed;
-            }
+            image = dto.getImage().trim();
         }
 
         Announcement announcement = Announcement.builder()
@@ -113,10 +113,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            String trimmed = dto.getImage().trim();
-            if (trimmed.length() <= 255) {
-                announcement.setImage(trimmed);
-            }
+            announcement.setImage(dto.getImage().trim());
         }
 
         return announcementRepository.save(announcement);

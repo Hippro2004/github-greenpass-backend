@@ -16,6 +16,7 @@ import lombok.Setter;
 @Builder
 public class SearchParkDto {
     private Integer id;
+    private Integer parkId;
 
     private String name;
 

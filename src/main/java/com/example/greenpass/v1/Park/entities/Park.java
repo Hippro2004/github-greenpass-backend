@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -70,11 +70,11 @@ public class Park {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "parkId")
-    @JsonManagedReference(value = "park-stamps")
+    @JsonIgnore
     private List<Stamp> stamps = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "park")
-    @JsonManagedReference(value = "park-rangers")
+    @JsonIgnore
     private List<ParkRanger> parkRangers = new ArrayList<>();
 
 }

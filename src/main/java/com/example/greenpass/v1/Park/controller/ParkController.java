@@ -32,21 +32,23 @@ public class ParkController {
                 try {
                         List<Park> parks = parkService.searchByName(keyword);
                         List<SearchParkDto> parkDtos = parks.stream()
-                                        .map(p -> new SearchParkDto(
-                                                        p.getParkId(),
-                                                        p.getName(),
-                                                        p.getImage(),
-                                                        p.getAddress(),
-                                                        p.getLocation(),
-                                                        p.getDescription(),
-                                                        p.getOpenTime(),
-                                                        p.getCloseTime(),
-                                                        p.isSeasonalPark(),
-                                                        p.getSeasonOpenDate(),
-                                                        p.getSeasonCloseDate(),
-                                                        p.isTemporaryClosed(),
-                                                        p.getEventNote(),
-                                                        p.getStatus()))
+                                        .map(p -> SearchParkDto.builder()
+                                                        .id(p.getParkId())
+                                                        .parkId(p.getParkId())
+                                                        .name(p.getName())
+                                                        .image(p.getImage())
+                                                        .address(p.getAddress())
+                                                        .location(p.getLocation())
+                                                        .description(p.getDescription())
+                                                        .openTime(p.getOpenTime())
+                                                        .closeTime(p.getCloseTime())
+                                                        .isSeasonalPark(p.isSeasonalPark())
+                                                        .seasonOpenDate(p.getSeasonOpenDate())
+                                                        .seasonCloseDate(p.getSeasonCloseDate())
+                                                        .isTemporaryClosed(p.isTemporaryClosed())
+                                                        .eventNote(p.getEventNote())
+                                                        .status(p.getStatus())
+                                                        .build())
                                         .toList();
                         // ResponseObject responseObject = new ResponseObject(true, "Success", parks);
                         // ResponseEntity<ResponseObject> responseEntity = new
