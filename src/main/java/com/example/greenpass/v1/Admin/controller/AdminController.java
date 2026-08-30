@@ -3,6 +3,7 @@ package com.example.greenpass.v1.Admin.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -122,17 +123,19 @@ public class AdminController {
             metrics.put("totalCompletedReport", totalCompletedReport);
 
             List<Park> parks = parkRepository.findAll();
-            final List<Report> finalReports = allReports;
-            final List<Announcement> finalAnnouncements = announcements;
+            
+            // Pre-group announcements and reports by parkId to optimize performance to O(N)
+            Map<Integer, Long> newsByPark = announcements.stream()
+                    .filter(a -> a.getPark() != null && a.getPark().getParkId() != null)
+                    .collect(Collectors.groupingBy(a -> a.getPark().getParkId(), Collectors.counting()));
+
+            Map<Integer, List<Report>> reportsByPark = allReports.stream()
+                    .filter(r -> r.getPark() != null && r.getPark().getParkId() != null)
+                    .collect(Collectors.groupingBy(r -> r.getPark().getParkId()));
 
             List<StatisticsResponse.ParkStatDto> parkStats = parks.stream().map(p -> {
-                long newsCount = finalAnnouncements.stream()
-                        .filter(a -> a.getPark() != null && a.getPark().getParkId().equals(p.getParkId()))
-                        .count();
-
-                List<Report> pReports = finalReports.stream()
-                        .filter(r -> r.getPark() != null && r.getPark().getParkId().equals(p.getParkId()))
-                        .toList();
+                long newsCount = newsByPark.getOrDefault(p.getParkId(), 0L);
+                List<Report> pReports = reportsByPark.getOrDefault(p.getParkId(), List.of());
 
                 long inProg = pReports.stream()
                         .filter(r -> r.getStatus() != null && (

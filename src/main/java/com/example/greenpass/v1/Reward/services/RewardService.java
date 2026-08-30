@@ -15,4 +15,5 @@ public interface RewardService {
 
     Reward addReward(AddRewardDto dto);
 
+    void deleteReward(int id);
 }

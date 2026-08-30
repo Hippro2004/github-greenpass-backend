@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,6 +92,28 @@ public class RewardController {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to Update Reward", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseObject> deleteReward(
+            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "rewardId", required = false) Integer rewardId) {
+        try {
+            int targetId = id != null ? id : (rewardId != null ? rewardId : 0);
+            rewardService.deleteReward(targetId);
+            return new ResponseEntity<>(new ResponseObject(true, "Delete Reward Successfully", null), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to Delete Reward", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<ResponseObject> deleteRewardPost(
+            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "rewardId", required = false) Integer rewardId) {
+        return deleteReward(id, rewardId);
     }
 
 }
