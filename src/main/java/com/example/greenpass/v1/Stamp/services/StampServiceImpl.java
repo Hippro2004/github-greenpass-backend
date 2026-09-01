@@ -1,9 +1,11 @@
 package com.example.greenpass.v1.Stamp.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,9 +53,9 @@ public class StampServiceImpl implements StampService {
         ParkRanger parkRanger = parkRangerService.getParkRangerByUsername(parkrangerUsername);
         Park park = parkRanger.getPark();
 
-        if (park != null && hasUserBeenStampedToday(username, park.getParkId())) {
-            throw new IllegalStateException("นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ" + park.getName()
-                    + "ในวันนี้ไปแล้ว ไม่สามารถสแกนซ้ำได้ภายใน 1 วัน");
+        if (park != null && hasUserBeenStampedWithinHours(username, park.getParkId(), 2)) {
+            throw new IllegalStateException("นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ " + park.getName()
+                    + " ไปแล้ว ไม่สามารถสแกนซ้ำได้ภายใน 2 ชั่วโมง");
         }
 
         Stamp newStamp = Stamp.builder()
@@ -72,6 +74,25 @@ public class StampServiceImpl implements StampService {
         if (username == null || parkId == null)
             return false;
         return stampRepository.existsByUserUsernameAndParkParkIdAndStampDate(username, parkId, LocalDate.now());
+    }
+
+    @Override
+    public boolean hasUserBeenStampedWithinHours(String username, Integer parkId, int hours) {
+        if (username == null || parkId == null) {
+            return false;
+        }
+        Optional<Stamp> latestStampOpt = stampRepository
+                .findTopByUserUsernameAndParkParkIdOrderByStampDateDescTimeDesc(username, parkId);
+        if (latestStampOpt.isEmpty()) {
+            return false;
+        }
+        Stamp latestStamp = latestStampOpt.get();
+        if (latestStamp.getStampDate() == null || latestStamp.getTime() == null) {
+            return false;
+        }
+        LocalDateTime lastStampDateTime = LocalDateTime.of(latestStamp.getStampDate(), latestStamp.getTime());
+        LocalDateTime now = LocalDateTime.now();
+        return now.isBefore(lastStampDateTime.plusHours(hours));
     }
 
     @Override

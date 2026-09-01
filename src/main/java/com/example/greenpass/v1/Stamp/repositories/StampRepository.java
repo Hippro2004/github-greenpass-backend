@@ -2,6 +2,7 @@ package com.example.greenpass.v1.Stamp.repositories;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,8 @@ public interface StampRepository extends JpaRepository<Stamp, Integer> {
     List<Stamp> findAllByUserUsernameAndParkParkId(String username, int parkId);
 
     boolean existsByUserUsernameAndParkParkIdAndStampDate(String username, Integer parkId, LocalDate now);
+
+    Optional<Stamp> findTopByUserUsernameAndParkParkIdOrderByStampDateDescTimeDesc(String username, Integer parkId);
 
     long countByUserIsForeigner(boolean b);
 

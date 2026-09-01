@@ -16,5 +16,7 @@ public interface StampService {
 
     boolean hasUserBeenStampedToday(String username, Integer parkId);
 
+    boolean hasUserBeenStampedWithinHours(String username, Integer parkId, int hours);
+
     VisitStatisticsResponse getVisitStatistics();
 }
