@@ -18,5 +18,7 @@ public class AnnouncementResponse {
     private LocalDate postDate;
     private String description;
     private String parkName;
+    private Integer parkId;
+    private String image;
 
 }

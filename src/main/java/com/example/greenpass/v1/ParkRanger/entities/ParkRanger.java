@@ -3,7 +3,7 @@ package com.example.greenpass.v1.ParkRanger.entities;
 import java.time.LocalDate;
 
 import com.example.greenpass.v1.Park.entities.Park;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -78,6 +78,6 @@ public class ParkRanger {
 
     @ManyToOne
     @JoinColumn(name = "parkId", nullable = false)
-    @JsonBackReference(value = "park-rangers")
+    @JsonIgnoreProperties({"parkRangers", "stamps"})
     private Park park;
 }

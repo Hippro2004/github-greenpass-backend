@@ -13,4 +13,9 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
     Optional<Report> findByUserUsername(String username);
 
     Optional<Report> findByReportId(int id);
+
+    List<Report> findAllByParkParkIdOrderByReportIdDesc(Integer parkId);
+
+    List<Report> findAllByOrderByReportIdDesc();
 }
+

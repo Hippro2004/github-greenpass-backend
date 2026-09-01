@@ -26,15 +26,15 @@ public class Reward {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer rewardId;
 
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String rewardTitle;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String rewardDetails;
 
     @Column(nullable = false)
     private LocalDate rewardAnnouncementDate;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String image;
 }

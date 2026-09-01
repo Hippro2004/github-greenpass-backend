@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+
 @RestController
 @RequestMapping("/announcement")
 @CrossOrigin(origins = "*")
@@ -85,6 +87,31 @@ public class AnnouncementController {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to create announcement", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ResponseObject> deleteAnnouncement(
+            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "announcementId", required = false) Integer announcementId) {
+        try {
+            int targetId = id != null ? id : (announcementId != null ? announcementId : 0);
+            announcementService.deleteAnnouncement(targetId);
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "Announcement deleted successfully", null),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to delete announcement", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<ResponseObject> deleteAnnouncementPost(
+            @RequestParam(value = "id", required = false) Integer id,
+            @RequestParam(value = "announcementId", required = false) Integer announcementId) {
+        return deleteAnnouncement(id, announcementId);
     }
 
 }

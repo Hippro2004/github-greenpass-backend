@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
+import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
+import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
 import com.example.greenpass.v1.ReplyReport.services.ReplyReportService;
 import com.example.greenpass.v1.Report.dtos.AddReportDto;
@@ -26,18 +28,33 @@ public class ReportServiceImpl implements ReportService {
     private final ReplyReportService replyReportService;
     private final UserService userService;
     private final ParkService parkService;
+    private final ParkRangerRepository parkRangerRepository;
+
+    private ReportResponse mapToResponse(Report r) {
+        String rangerName = "-";
+        if (r.getPark() != null && r.getPark().getParkRangers() != null && !r.getPark().getParkRangers().isEmpty()) {
+            ParkRanger ranger = r.getPark().getParkRangers().get(0);
+            rangerName = ranger.getFirstname() + " " + ranger.getSurname();
+        }
+        return ReportResponse.builder()
+                .reportId(r.getReportId())
+                .name(r.getName())
+                .description(r.getDescription())
+                .status(r.getStatus())
+                .reportDate(r.getReportDate())
+                .parkId(r.getPark() != null ? r.getPark().getParkId() : 0)
+                .parkName(r.getPark() != null ? r.getPark().getName() : "")
+                .username(r.getUser() != null ? r.getUser().getUsername() : "")
+                .image(r.getImage())
+                .parkRangerName(rangerName)
+                .build();
+    }
 
     @Override
     public List<ReportResponse> getAllByUsername(String username) {
         return reportRepository.findAllByUserUsername(username).stream()
-                .map(r -> new ReportResponse(r.getName(),
-                        r.getDescription(),
-                        r.getStatus(),
-                        r.getReportDate(),
-                        r.getPark().getParkId(),
-                        r.getPark().getName()))
+                .map(this::mapToResponse)
                 .toList();
-
     }
 
     @Override
@@ -80,4 +97,55 @@ public class ReportServiceImpl implements ReportService {
         return reportRepository.findByReportId(id).orElse(null);
     }
 
+    @Override
+    public List<ReportResponse> getAllReports() {
+        return reportRepository.findAllByOrderByReportIdDesc().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ReportResponse> getReportsByParkId(int parkId) {
+        return reportRepository.findAllByParkParkIdOrderByReportIdDesc(parkId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ReportResponse> getReportsByRangerUsername(String rangerUsername) {
+        ParkRanger ranger = parkRangerRepository.findByUsername(rangerUsername);
+        if (ranger != null && ranger.getPark() != null) {
+            return getReportsByParkId(ranger.getPark().getParkId());
+        }
+        return List.of();
+    }
+
+    @Override
+    public ReportResponse updateReportStatus(int reportId, String status, String rangerUsername) {
+        Report report = reportRepository.findByReportId(reportId).orElse(null);
+        if (report != null) {
+            report.setStatus(status);
+            reportRepository.save(report);
+
+            ParkRanger ranger = null;
+            if (rangerUsername != null && !rangerUsername.isEmpty()) {
+                ranger = parkRangerRepository.findByUsername(rangerUsername);
+            }
+
+            ReplyReport replyReport = ReplyReport.builder()
+                    .updateDate(LocalDate.now())
+                    .progress("Status updated to " + status)
+                    .currentStatus(status)
+                    .image(report.getImage())
+                    .report(report)
+                    .parkRanger(ranger)
+                    .build();
+            replyReportService.addReplyReport(replyReport, report);
+
+            return mapToResponse(report);
+        }
+        return null;
+    }
+
 }
+

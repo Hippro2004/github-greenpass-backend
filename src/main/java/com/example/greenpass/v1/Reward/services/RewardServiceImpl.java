@@ -49,4 +49,9 @@ public class RewardServiceImpl implements RewardService {
         return rewardRepository.save(reward);
     }
 
+    @Override
+    public void deleteReward(int id) {
+        rewardRepository.deleteById(id);
+    }
+
 }

@@ -15,4 +15,12 @@ public interface ReportService {
 
     Report getByReportId(int id);
 
+    List<ReportResponse> getAllReports();
+
+    List<ReportResponse> getReportsByParkId(int parkId);
+
+    List<ReportResponse> getReportsByRangerUsername(String rangerUsername);
+
+    ReportResponse updateReportStatus(int reportId, String status, String rangerUsername);
 }
+
