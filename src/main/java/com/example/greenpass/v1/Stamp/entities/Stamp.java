@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Stamp.entities;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
@@ -33,6 +34,9 @@ public class Stamp {
 
     @Column(nullable = false)
     private LocalDate stampDate;
+
+    @Column(nullable = false)
+    private LocalTime time;
 
     @ManyToOne
     @JoinColumn(name = "username", nullable = false)
