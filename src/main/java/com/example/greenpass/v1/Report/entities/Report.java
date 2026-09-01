@@ -3,6 +3,7 @@ package com.example.greenpass.v1.Report.entities;
 import java.time.LocalDate;
 
 import com.example.greenpass.v1.Park.entities.Park;
+import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.User.entities.User;
 
 import jakarta.persistence.Column;

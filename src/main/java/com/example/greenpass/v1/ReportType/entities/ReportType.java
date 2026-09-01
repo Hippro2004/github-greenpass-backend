@@ -1,4 +1,4 @@
-package com.example.greenpass.v1.Report.entities;
+package com.example.greenpass.v1.ReportType.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +22,7 @@ public class ReportType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private String name;
+    private Integer typeId;
+    private String typeName;
 
 }
