@@ -53,4 +53,8 @@ public class Report {
     @ManyToOne
     @JoinColumn(name = "username", nullable = false)
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "typeId", nullable = false)
+    private ReportType type;
 }
