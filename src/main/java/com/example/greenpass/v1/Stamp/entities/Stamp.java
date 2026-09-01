@@ -46,4 +46,5 @@ public class Stamp {
     @ManyToOne
     @JoinColumn(name = "usernameParkRanger", nullable = false)
     private ParkRanger parkRanger;
+
 }

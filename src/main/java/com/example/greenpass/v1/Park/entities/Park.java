@@ -37,7 +37,7 @@ public class Park {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String image;
 
     @Column(nullable = false)
@@ -46,7 +46,7 @@ public class Park {
     @Column(nullable = false)
     private String location;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
