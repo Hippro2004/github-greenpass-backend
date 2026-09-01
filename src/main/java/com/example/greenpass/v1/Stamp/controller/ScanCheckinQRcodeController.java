@@ -37,6 +37,23 @@ public class ScanCheckinQRcodeController {
     public ResponseEntity<ResponseObject> scanQr(@RequestBody ScanQrDto scanQrDto) {
         try {
             String token = scanQrDto.getToken();
+            if (token == null || token.trim().isEmpty()) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "ไม่พบข้อมูล Token ของ QR Code", null),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            token = token.trim();
+
+            // 1. ตรวจสอบว่า QR Code (JWT) หมดอายุแล้วหรือไม่
+            if (token.contains(".")) {
+                if (jwtService.isTokenExpired(token)) {
+                    return new ResponseEntity<>(
+                            new ResponseObject(false, "QR Code หมดอายุแล้ว กรุณาให้นักท่องเที่ยวรีเฟรช QR Code ใหม่", null),
+                            HttpStatus.UNAUTHORIZED);
+                }
+            }
+
             User user = resolveUserFromToken(token);
 
             if (user == null) {
@@ -120,40 +137,38 @@ public class ScanCheckinQRcodeController {
             return userRepository.findByUsername("user01").orElse(null);
         }
 
-        // 1. Direct username lookup
+        // 1. If it is a JWT token, extract username using jwtService
+        if (token.contains(".")) {
+            try {
+                String extractedUsername = jwtService.extractUserId(token);
+                if (extractedUsername != null) {
+                    Optional<User> uOpt = userRepository.findByUsername(extractedUsername);
+                    if (uOpt.isPresent())
+                        return uOpt.get();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 2. Direct username lookup
         Optional<User> uOpt = userRepository.findByUsername(token);
         if (uOpt.isPresent())
             return uOpt.get();
 
-        // 2. Direct email lookup
+        // 3. Direct email lookup
         uOpt = userRepository.findByEmail(token);
         if (uOpt.isPresent())
             return uOpt.get();
 
-        // 3. Direct phone lookup
+        // 4. Direct phone lookup
         uOpt = userRepository.findByPhone(token);
         if (uOpt.isPresent())
             return uOpt.get();
 
-        // 4. Direct firstname lookup (e.g. "วิภา", "ชัยประเสริฐ")
+        // 5. Direct firstname lookup (e.g. "วิภา", "ชัยประเสริฐ")
         uOpt = userRepository.findByFirstname(token);
         if (uOpt.isPresent())
             return uOpt.get();
-
-        // 5. Try parsing JWT payload (split by '.')
-        if (token.contains(".")) {
-            String[] parts = token.split("\\.");
-            if (parts.length >= 2) {
-                try {
-                    String payloadJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]),
-                            java.nio.charset.StandardCharsets.UTF_8);
-                    User fromPayload = parseUserFromJsonPayload(payloadJson);
-                    if (fromPayload != null)
-                        return fromPayload;
-                } catch (Exception ignored) {
-                }
-            }
-        }
 
         // 6. Try parsing JSON string directly if token starts with '{'
         if (token.startsWith("{")) {
@@ -162,30 +177,21 @@ public class ScanCheckinQRcodeController {
                 return fromJson;
         }
 
-        // 7. JwtService fallback
-        try {
-            String extractedUsername = jwtService.extractUserId(token);
-            if (extractedUsername != null) {
-                uOpt = userRepository.findByUsername(extractedUsername);
-                if (uOpt.isPresent())
-                    return uOpt.get();
+        // 7. Broad scan against all users in database (fallback only for non-JWT)
+        if (!token.contains(".")) {
+            List<User> allUsers = userRepository.findAll();
+            for (User u : allUsers) {
+                if (u.getUsername() != null && token.equalsIgnoreCase(u.getUsername()))
+                    return u;
+                if (u.getEmail() != null && token.equalsIgnoreCase(u.getEmail()))
+                    return u;
+                if (u.getPhone() != null && token.equals(u.getPhone()))
+                    return u;
+                if (u.getFirstname() != null && !u.getFirstname().isEmpty() && token.contains(u.getFirstname()))
+                    return u;
+                if (u.getUsername() != null && !u.getUsername().isEmpty() && token.contains(u.getUsername()))
+                    return u;
             }
-        } catch (Exception ignored) {
-        }
-
-        // 8. Broad scan against all users in database
-        List<User> allUsers = userRepository.findAll();
-        for (User u : allUsers) {
-            if (u.getUsername() != null && token.equalsIgnoreCase(u.getUsername()))
-                return u;
-            if (u.getEmail() != null && token.equalsIgnoreCase(u.getEmail()))
-                return u;
-            if (u.getPhone() != null && token.equals(u.getPhone()))
-                return u;
-            if (u.getFirstname() != null && !u.getFirstname().isEmpty() && token.contains(u.getFirstname()))
-                return u;
-            if (u.getUsername() != null && !u.getUsername().isEmpty() && token.contains(u.getUsername()))
-                return u;
         }
 
         return null;
