@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Stamp.services;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class StampServiceImpl implements StampService {
 
         Stamp newStamp = Stamp.builder()
                 .stampDate(LocalDate.now())
+                .time(LocalTime.now())
                 .user(user)
                 .park(park)
                 .parkRanger(parkRanger)

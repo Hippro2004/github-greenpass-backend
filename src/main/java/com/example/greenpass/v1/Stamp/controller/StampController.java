@@ -81,6 +81,7 @@ public class StampController {
                     .map(stamp -> new StampResponse(
                             stamp.getStampId(),
                             stamp.getStampDate(),
+                            stamp.getTime(),
                             stamp.getPark().getParkId(),
                             stamp.getPark().getName()))
                     .toList();
