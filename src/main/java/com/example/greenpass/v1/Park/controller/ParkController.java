@@ -79,6 +79,7 @@ public class ParkController {
 
                         SearchParkDto parkDto = SearchParkDto.builder()
                                         .id(park.getParkId())
+                                        .parkId(park.getParkId())
                                         .name(park.getName())
                                         .image(park.getImage())
                                         .address(park.getAddress())
