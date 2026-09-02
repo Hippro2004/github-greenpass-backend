@@ -1,5 +1,6 @@
 package com.example.greenpass.v1.ReportType.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,8 @@ public class ReportType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer typeId;
+
+    @Column(nullable = false, length = 25)
     private String typeName;
 
 }
