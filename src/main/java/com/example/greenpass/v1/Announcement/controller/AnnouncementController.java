@@ -91,11 +91,22 @@ public class AnnouncementController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseObject> deleteAnnouncement(
-            @RequestParam(value = "id", required = false) Integer id,
-            @RequestParam(value = "announcementId", required = false) Integer announcementId) {
+            @RequestParam(value = "id", required = false) String idStr,
+            @RequestParam(value = "announcementId", required = false) String announcementIdStr) {
         try {
-            int targetId = id != null ? id : (announcementId != null ? announcementId : 0);
-            announcementService.deleteAnnouncement(targetId);
+            int targetId = 0;
+            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined") && !idStr.equalsIgnoreCase("null")) {
+                try {
+                    targetId = (int) Math.floor(Double.parseDouble(idStr.trim()));
+                } catch (Exception e) {}
+            } else if (announcementIdStr != null && !announcementIdStr.trim().isEmpty()) {
+                try {
+                    targetId = (int) Math.floor(Double.parseDouble(announcementIdStr.trim()));
+                } catch (Exception e) {}
+            }
+            if (targetId > 0) {
+                announcementService.deleteAnnouncement(targetId);
+            }
             return new ResponseEntity<>(
                     new ResponseObject(true, "Announcement deleted successfully", null),
                     HttpStatus.OK);
@@ -109,9 +120,8 @@ public class AnnouncementController {
 
     @PostMapping("/delete")
     public ResponseEntity<ResponseObject> deleteAnnouncementPost(
-            @RequestParam(value = "id", required = false) Integer id,
-            @RequestParam(value = "announcementId", required = false) Integer announcementId) {
-        return deleteAnnouncement(id, announcementId);
+            @RequestParam(value = "id", required = false) String idStr,
+            @RequestParam(value = "announcementId", required = false) String announcementIdStr) {
+        return deleteAnnouncement(idStr, announcementIdStr);
     }
-
 }
