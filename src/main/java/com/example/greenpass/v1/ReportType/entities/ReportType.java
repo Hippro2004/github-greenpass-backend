@@ -23,6 +23,7 @@ public class ReportType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer typeId;
 
     @Column(nullable = false, length = 25)
