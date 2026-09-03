@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Report.services;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -76,6 +77,7 @@ public class ReportServiceImpl implements ReportService {
                     .name(addReportDto.getName())
                     .description(addReportDto.getDescription())
                     .reportDate(LocalDate.now())
+                    .reportTime(LocalTime.now())
                     .status("Pending")
                     .image(addReportDto.getImage())
                     .park(park)
