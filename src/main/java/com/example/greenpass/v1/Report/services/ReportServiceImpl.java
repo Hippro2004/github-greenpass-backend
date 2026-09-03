@@ -46,6 +46,7 @@ public class ReportServiceImpl implements ReportService {
                 .description(r.getDescription())
                 .status(r.getStatus())
                 .reportDate(r.getReportDate())
+                .reportTime(r.getReportTime())
                 .parkId(r.getPark() != null ? r.getPark().getParkId() : 0)
                 .parkName(r.getPark() != null ? r.getPark().getName() : "")
                 .username(r.getUser() != null ? r.getUser().getUsername() : "")
