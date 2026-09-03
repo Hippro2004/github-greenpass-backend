@@ -1,5 +1,7 @@
 package com.example.greenpass.v1.ReplyReport.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
@@ -28,6 +30,11 @@ public class ReplyReportServiceImpl implements ReplyReportService {
                 .parkRanger(replyReport.getParkRanger())
                 .build();
         replyReporyRepository.save(addReplyReport);
+    }
+
+    @Override
+    public List<ReplyReport> getReplyReportByReportId(int reportId) {
+        return replyReporyRepository.findAllByReportReportId(reportId);
     }
 
 }
