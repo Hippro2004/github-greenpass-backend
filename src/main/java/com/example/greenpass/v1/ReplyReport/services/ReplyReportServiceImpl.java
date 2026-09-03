@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.greenpass.v1.ReplyReport.dtos.ReplyReportResponse;
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
 import com.example.greenpass.v1.ReplyReport.repositories.ReplyReporyRepository;
 import com.example.greenpass.v1.Report.entities.Report;
@@ -33,8 +34,17 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     }
 
     @Override
-    public List<ReplyReport> getReplyReportByReportId(int reportId) {
-        return replyReporyRepository.findAllByReportReportId(reportId);
+    public List<ReplyReportResponse> getReplyReportByReportId(int reportId) {
+        return replyReporyRepository.findAllByReportReportId(reportId).stream().map(e -> {
+            return ReplyReportResponse.builder()
+                    .updateDate(e.getUpdateDate())
+                    .updateTime(e.getUpdateTime())
+                    .progress(e.getProgress())
+                    .currentStatus(e.getCurrentStatus())
+                    .image(e.getImage())
+                    .parkRangerName(e.getParkRanger() != null ? e.getParkRanger().getFirstname() : null)
+                    .build();
+        }).toList();
     }
 
 }

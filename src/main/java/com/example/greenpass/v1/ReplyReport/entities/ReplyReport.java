@@ -30,7 +30,7 @@ import lombok.Setter;
 public class ReplyReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer replyReportId;
+    private Long replyReportId;
 
     @Column(nullable = false)
     private LocalDate updateDate;
