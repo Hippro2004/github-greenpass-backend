@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.greenpass.v1.ReportType.dtos.ReportTypeResponse;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.ReportType.repositories.ReportTypeRepository;
 
@@ -21,8 +22,14 @@ public class ReporyTypeServicImpl implements ReporyTypeService {
     }
 
     @Override
-    public List<ReportType> getAllType() {
-        return reportTypeRepository.findAll();
+    public List<ReportTypeResponse> getAllType() {
+        List<ReportType> reportTypes = reportTypeRepository.findAll();
+        if (reportTypes.isEmpty()) {
+            return null;
+        }
+        return reportTypes.stream()
+                .map(reportType -> new ReportTypeResponse(reportType.getTypeName()))
+                .toList();
     }
 
     @Override

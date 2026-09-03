@@ -27,15 +27,11 @@ public class ReporyTypeController {
     @GetMapping("/all")
     public ResponseEntity<ResponseObject> getAllReportType() {
         try {
-            List<ReportType> reportTypes = reporyTypeService.getAllType();
-            if (reportTypes.isEmpty()) {
+            List<ReportTypeResponse> reportTypes = reporyTypeService.getAllType();
+            if (reportTypes.isEmpty() || reportTypes == null) {
                 return new ResponseEntity<>(new ResponseObject(false, "Not Found", null), HttpStatus.NOT_FOUND);
             } else {
-                List<ReportTypeResponse> reportTypeResponses = reportTypes.stream()
-                        .map(reportType -> new ReportTypeResponse(reportType.getTypeName()))
-                        .collect(Collectors.toList());
-
-                return new ResponseEntity<>(new ResponseObject(true, "OK", reportTypeResponses), HttpStatus.OK);
+                return new ResponseEntity<>(new ResponseObject(true, "OK", reportTypes), HttpStatus.OK);
 
             }
         } catch (Exception e) {
