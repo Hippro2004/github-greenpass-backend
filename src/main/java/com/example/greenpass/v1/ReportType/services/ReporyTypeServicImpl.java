@@ -25,4 +25,9 @@ public class ReporyTypeServicImpl implements ReporyTypeService {
         return reportTypeRepository.findAll();
     }
 
+    @Override
+    public ReportType getTypeByName(String typeName) {
+        return reportTypeRepository.findByTypeName(typeName).orElse(null);
+    }
+
 }

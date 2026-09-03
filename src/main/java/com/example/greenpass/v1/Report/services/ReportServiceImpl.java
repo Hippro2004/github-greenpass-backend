@@ -15,6 +15,8 @@ import com.example.greenpass.v1.Report.dtos.AddReportDto;
 import com.example.greenpass.v1.Report.dtos.ReportResponse;
 import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
+import com.example.greenpass.v1.ReportType.entities.ReportType;
+import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
 
@@ -29,6 +31,7 @@ public class ReportServiceImpl implements ReportService {
     private final UserService userService;
     private final ParkService parkService;
     private final ParkRangerRepository parkRangerRepository;
+    private final ReporyTypeService reportTypeService;
 
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "-";
@@ -66,6 +69,7 @@ public class ReportServiceImpl implements ReportService {
     public void addReport(AddReportDto addReportDto, String username) {
         User user = userService.getUserByUsername(username);
         Park park = parkService.getParkById(addReportDto.getParkId());
+        ReportType type = reportTypeService.getTypeByName(addReportDto.getTypeName());
 
         if (user != null) {
             Report addReport = Report.builder()
@@ -76,6 +80,7 @@ public class ReportServiceImpl implements ReportService {
                     .image(addReportDto.getImage())
                     .park(park)
                     .user(user)
+                    .type(type)
                     .build();
             reportRepository.save(addReport);
 
@@ -148,4 +153,3 @@ public class ReportServiceImpl implements ReportService {
     }
 
 }
-

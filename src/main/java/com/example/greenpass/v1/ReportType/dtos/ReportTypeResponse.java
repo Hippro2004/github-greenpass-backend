@@ -1,4 +1,4 @@
-package com.example.greenpass.v1.Report.dtos;
+package com.example.greenpass.v1.ReportType.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,11 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddReportDto {
-    private String name;
-    private String description;
-    private String image;
+public class ReportTypeResponse {
+
     private String typeName;
-    private int parkId;
 
 }

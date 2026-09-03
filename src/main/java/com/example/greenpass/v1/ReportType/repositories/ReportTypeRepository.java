@@ -8,6 +8,6 @@ import com.example.greenpass.v1.ReportType.entities.ReportType;
 
 public interface ReportTypeRepository extends JpaRepository<ReportType, Integer> {
     boolean existsByTypeName(String typeName);
+
     Optional<ReportType> findByTypeName(String typeName);
 }
-
