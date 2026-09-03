@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Report.dtos;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,10 +20,10 @@ public class ReportResponse {
     private String description;
     private String status;
     private LocalDate reportDate;
+    private LocalTime reportTime;
     private int parkId;
     private String parkName;
     private String username;
     private String image;
     private String parkRangerName;
 }
-
