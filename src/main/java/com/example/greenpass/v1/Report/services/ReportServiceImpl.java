@@ -86,6 +86,7 @@ public class ReportServiceImpl implements ReportService {
 
             ReplyReport replyReport = ReplyReport.builder()
                     .updateDate(addReport.getReportDate())
+                    .updateTime(addReport.getReportTime())
                     .progress(null)
                     .currentStatus(addReport.getStatus())
                     .image(addReport.getImage())

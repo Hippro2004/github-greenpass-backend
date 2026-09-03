@@ -20,10 +20,11 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     public void addReplyReport(ReplyReport replyReport, Report report) {
         ReplyReport addReplyReport = ReplyReport.builder()
                 .updateDate(replyReport.getUpdateDate())
+                .updateTime(replyReport.getUpdateTime())
                 .progress(replyReport.getProgress())
                 .currentStatus(replyReport.getCurrentStatus())
                 .image(replyReport.getImage())
-                .report(replyReport.getReport())
+                .report(report)
                 .parkRanger(replyReport.getParkRanger())
                 .build();
         replyReporyRepository.save(addReplyReport);

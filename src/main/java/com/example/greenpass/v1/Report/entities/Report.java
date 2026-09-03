@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Report.entities;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
@@ -38,6 +39,9 @@ public class Report {
 
     @Column(nullable = false)
     private LocalDate reportDate;
+
+    @Column(nullable = false)
+    private LocalTime reportTime;
 
     @Column(nullable = false)
     private String description;

@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.ReplyReport.entities;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.Report.entities.Report;
@@ -33,6 +34,9 @@ public class ReplyReport {
 
     @Column(nullable = false)
     private LocalDate updateDate;
+
+    @Column(nullable = false)
+    private LocalTime updateTime;
 
     private String progress;
 
