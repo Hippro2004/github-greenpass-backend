@@ -15,4 +15,7 @@ public interface NotificationService {
 
     List<Notification> getNotificationPark(int parkId);
 
+    List<Notification> getNotificationUser(String username);
+
+    void markAsRead(Long notificationId);
 }

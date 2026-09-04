@@ -36,7 +36,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        String destination = "/topic/park" + park.getParkId() + "/notifications";
+        String destination = "/topic/park/" + park.getParkId() + "/notifications";
         messagingTemplate.convertAndSend(destination, saved);
 
     }
@@ -54,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        String destination = "/topic/user" + user.getUsername() + "/notifications";
+        String destination = "/topic/user/" + user.getUsername() + "/notifications";
         messagingTemplate.convertAndSend(destination, saved);
 
         if (user != null && user.getFcmToken() != null && !user.getFcmToken().isBlank()) {
@@ -81,4 +81,18 @@ public class NotificationServiceImpl implements NotificationService {
     public List<Notification> getNotificationPark(int parkId) {
         return notificationRepository.findAllByParkParkIdOrderByCreatedAtDesc(parkId);
     }
+
+    @Override
+    public List<Notification> getNotificationUser(String username) {
+        return notificationRepository.findAllByUserUsernameOrderByCreatedAtDesc(username);
+    }
+
+    @Override
+    public void markAsRead(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+        notification.setRead(true);
+        notificationRepository.save(notification);
+    }
+
 }
