@@ -1,7 +1,7 @@
 package com.example.greenpass.Config;
 
 import java.io.InputStream;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import com.google.auth.oauth2.GoogleCredentials;
