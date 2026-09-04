@@ -80,7 +80,7 @@ public class UserController {
 
     @PutMapping("/{username}")
     public ResponseEntity<ResponseObject> updateUser(
-            @PathVariable String username,
+            @PathVariable("username") String username,
             @RequestBody UpdateUserDto updateUserDto) {
         try {
             User user = userService.getUserByUsername(username);
@@ -90,6 +90,28 @@ public class UserController {
                         HttpStatus.NOT_FOUND);
             }
             userService.updateUser(user.getUsername(), updateUserDto);
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "Update successfully", null),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to update", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{username}/fcm-token")
+    public ResponseEntity<ResponseObject> updateFcmToken(
+            @PathVariable("username") String username,
+            @RequestBody String fcmToken) {
+        try {
+            User user = userService.getUserByUsername(username);
+            if (user == null) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "User not found", null),
+                        HttpStatus.NOT_FOUND);
+            }
+            userService.updateFcmToken(user.getUsername(), fcmToken);
             return new ResponseEntity<>(
                     new ResponseObject(true, "Update successfully", null),
                     HttpStatus.OK);

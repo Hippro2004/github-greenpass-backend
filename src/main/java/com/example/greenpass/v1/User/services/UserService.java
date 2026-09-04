@@ -14,4 +14,7 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     void updateUser(String username, UpdateUserDto updateUserDto);
+
+    void updateFcmToken(String username, String fcmToken);
+
 }
