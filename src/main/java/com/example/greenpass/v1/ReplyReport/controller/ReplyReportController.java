@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.ReplyReport.dtos.ReplyReportResponse;
-import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
 import com.example.greenpass.v1.ReplyReport.services.ReplyReportService;
 
 import lombok.RequiredArgsConstructor;

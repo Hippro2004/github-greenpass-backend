@@ -5,13 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.ReportType.dtos.ReportTypeResponse;
-import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
