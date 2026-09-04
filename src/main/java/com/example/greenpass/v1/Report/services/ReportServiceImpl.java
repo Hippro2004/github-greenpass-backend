@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.example.greenpass.v1.Notification.services.NotificationService;
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
@@ -33,6 +34,7 @@ public class ReportServiceImpl implements ReportService {
     private final ParkService parkService;
     private final ParkRangerRepository parkRangerRepository;
     private final ReporyTypeService reportTypeService;
+    private final NotificationService notificationService;
 
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "-";
@@ -97,6 +99,12 @@ public class ReportServiceImpl implements ReportService {
                     .parkRanger(null)
                     .build();
             replyReportService.addReplyReport(replyReport, addReport);
+
+            notificationService.sendParkNotification(park,
+                    "มีรายงานปัญหาใหม่ (" + type.getTypeName() + ")",
+                    addReport.getName() + ": " + addReport.getDescription(),
+                    addReport.getReportId());
+
         }
 
     }
