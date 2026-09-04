@@ -60,4 +60,7 @@ public class User {
     @Column(length = 5)
     private String zipcode;
 
+    @Column(length = 255)
+    private String fcmToken;
+
 }

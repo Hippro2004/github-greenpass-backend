@@ -3,6 +3,8 @@ package com.example.greenpass.v1.Notification.entities;
 import java.time.LocalDateTime;
 
 import com.example.greenpass.v1.Park.entities.Park;
+import com.example.greenpass.v1.Report.entities.Report;
+import com.example.greenpass.v1.User.entities.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,15 +39,20 @@ public class Notification {
     @Column(nullable = false)
     private String message;
 
-    @Column(nullable = false)
-    private int reportId;
-
     private boolean isRead;
 
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "parkId", nullable = false)
+    @JoinColumn(name = "reportId", nullable = false)
+    private Report report;
+
+    @ManyToOne
+    @JoinColumn(name = "parkId", nullable = true)
     private Park park;
+
+    @ManyToOne
+    @JoinColumn(name = "username", nullable = true)
+    private User user;
 
 }

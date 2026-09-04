@@ -87,23 +87,23 @@ public class ReportServiceImpl implements ReportService {
                     .user(user)
                     .type(type)
                     .build();
-            reportRepository.save(addReport);
+            Report saved = reportRepository.save(addReport);
 
             ReplyReport replyReport = ReplyReport.builder()
-                    .updateDate(addReport.getReportDate())
-                    .updateTime(addReport.getReportTime())
+                    .updateDate(saved.getReportDate())
+                    .updateTime(saved.getReportTime())
                     .progress(null)
                     .currentStatus(addReport.getStatus())
                     .image(addReport.getImage())
-                    .report(addReport)
+                    .report(saved)
                     .parkRanger(null)
                     .build();
-            replyReportService.addReplyReport(replyReport, addReport);
+            replyReportService.addReplyReport(replyReport, saved);
 
             notificationService.sendParkNotification(park,
                     "มีรายงานปัญหาใหม่ (" + type.getTypeName() + ")",
                     addReport.getName() + ": " + addReport.getDescription(),
-                    addReport.getReportId());
+                    saved);
 
         }
 
@@ -159,7 +159,16 @@ public class ReportServiceImpl implements ReportService {
                     .build();
             replyReportService.addReplyReport(replyReport, report);
 
+            User reportOwner = report.getUser();
+
+            notificationService.sendUserNotification(
+                    reportOwner,
+                    "อัปเดตสถานะรายงาน (" + status + ")",
+                    "รายงาน '" + report.getName() + "' ของคุณได้รับการเปลี่ยนสถานะเป็น " + status,
+                    report);
+
             return mapToResponse(report);
+
         }
         return null;
     }
