@@ -14,8 +14,17 @@ public class FirebaseConfig {
     @PostConstruct
     public void initialize() {
         try {
-            // เอาไฟล์ json กุญแจจาก Firebase Console มาวางไว้ที่ src/main/resources/
-            InputStream serviceAccount = new ClassPathResource("firebase-service-account.json").getInputStream();
+            ClassPathResource resource = new ClassPathResource("firebase-service-account.json");
+
+            // เช็คว่าถ้ายังไม่มีไฟล์ ให้ข้ามไปก่อน ไม่ต้องฟ้อง Error สีแดง
+
+            if (!resource.exists()) {
+                System.out.println(
+                        "⚠️ Warning: firebase-service-account.json not found. Push notifications are disabled.");
+                return;
+            }
+
+            InputStream serviceAccount = resource.getInputStream();
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -23,9 +32,11 @@ public class FirebaseConfig {
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
+                System.out.println("✅ Firebase initialized successfully!");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }

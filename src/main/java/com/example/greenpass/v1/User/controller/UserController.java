@@ -1,5 +1,7 @@
 package com.example.greenpass.v1.User.controller;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -103,18 +105,20 @@ public class UserController {
     @PutMapping("/{username}/fcm-token")
     public ResponseEntity<ResponseObject> updateFcmToken(
             @PathVariable("username") String username,
-            @RequestBody String fcmToken) {
+            @RequestBody Map<String, String> payload) {
         try {
             User user = userService.getUserByUsername(username);
-            if (user == null) {
+            if (user != null) {
+                String token = payload.get("fcmToken");
+                userService.updateFcmToken(user.getUsername(), token);
                 return new ResponseEntity<>(
-                        new ResponseObject(false, "User not found", null),
-                        HttpStatus.NOT_FOUND);
+                        new ResponseObject(true, "Update successfully", null),
+                        HttpStatus.OK);
             }
-            userService.updateFcmToken(user.getUsername(), fcmToken);
+
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Update successfully", null),
-                    HttpStatus.OK);
+                    new ResponseObject(false, "User not found", null),
+                    HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(
                     new ResponseObject(false, "Failed to update", null),
