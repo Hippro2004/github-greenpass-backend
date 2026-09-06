@@ -151,6 +151,7 @@ public class ReportServiceImpl implements ReportService {
 
             ReplyReport replyReport = ReplyReport.builder()
                     .updateDate(LocalDate.now())
+                    .updateTime(LocalTime.now())
                     .progress("Status updated to " + status)
                     .currentStatus(status)
                     .image(report.getImage())
