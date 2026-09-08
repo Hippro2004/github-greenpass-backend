@@ -2,6 +2,8 @@ package com.example.greenpass.v1.User.entities;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -26,6 +28,7 @@ public class User {
     private String username;
 
     @Column(nullable = false, length = 16)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false, length = 50)
