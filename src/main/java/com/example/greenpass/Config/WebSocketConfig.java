@@ -12,17 +12,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // ให้ client subscribe ไปที่ prefix /topic
         config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // endpoint ที่ frontend ใช้เชื่อมต่อ SockJS / STOMP
         registry.addEndpoint("/ws-greenpass")
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
-
 }
