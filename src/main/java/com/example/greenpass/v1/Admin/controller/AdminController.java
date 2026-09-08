@@ -155,9 +155,23 @@ public class AdminController {
                         .count();
 
                 String province = "ทั่วไป";
-                if (p.getAddress() != null && p.getAddress().contains("จ.")) {
-                    String sub = p.getAddress().substring(p.getAddress().indexOf("จ.") + 2).trim();
-                    province = sub.split(" ")[0];
+                if (p.getAddress() != null) {
+                    String addr = p.getAddress();
+                    if (addr.contains("จ.")) {
+                        String sub = addr.substring(addr.indexOf("จ.") + 2).trim();
+                        province = sub.split("[\\s,]+")[0];
+                    } else if (addr.contains("จังหวัด")) {
+                        String sub = addr.substring(addr.indexOf("จังหวัด") + 7).trim();
+                        province = sub.split("[\\s,]+")[0];
+                    }
+                }
+                
+                if ("ทั่วไป".equals(province) || province.isBlank()) {
+                    String name = p.getName() != null ? p.getName() : "";
+                    if (name.contains("เขาใหญ่")) province = "นครราชสีมา";
+                    else if (name.contains("แก่งกระจาน")) province = "เพชรบุรี";
+                    else if (name.contains("เอราวัณ")) province = "กาญจนบุรี";
+                    else if (name.contains("ดอยสุเทพ") || name.contains("ดอยอินทนนท์")) province = "เชียงใหม่";
                 }
 
                 return StatisticsResponse.ParkStatDto.builder()
