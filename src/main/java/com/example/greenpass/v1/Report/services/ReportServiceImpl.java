@@ -19,6 +19,7 @@ import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
+import com.example.greenpass.v1.ReportType.repositories.ReportTypeRepository;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
 
@@ -34,6 +35,7 @@ public class ReportServiceImpl implements ReportService {
     private final ParkService parkService;
     private final ParkRangerRepository parkRangerRepository;
     private final ReporyTypeService reportTypeService;
+    private final ReportTypeRepository reportTypeRepository;
     private final NotificationService notificationService;
 
     private ReportResponse mapToResponse(Report r) {
@@ -54,6 +56,7 @@ public class ReportServiceImpl implements ReportService {
                 .username(r.getUser() != null ? r.getUser().getUsername() : "")
                 .image(r.getImage())
                 .parkRangerName(rangerName)
+                .typeName(r.getType() != null ? r.getType().getTypeName() : "ปกติ")
                 .build();
     }
 
@@ -73,7 +76,29 @@ public class ReportServiceImpl implements ReportService {
     public void addReport(AddReportDto addReportDto, String username) {
         User user = userService.getUserByUsername(username);
         Park park = parkService.getParkById(addReportDto.getParkId());
-        ReportType type = reportTypeService.getTypeByName(addReportDto.getTypeName());
+        
+        String inputTypeName = addReportDto.getTypeName();
+        ReportType type = null;
+        if (inputTypeName != null && !inputTypeName.isBlank()) {
+            String trimmed = inputTypeName.trim();
+            type = reportTypeService.getTypeByName(trimmed);
+            if (type == null) {
+                if ("2".equals(trimmed) || trimmed.contains("ร้ายแรง") || trimmed.contains("ฉุกเฉิน") || trimmed.equalsIgnoreCase("severe") || trimmed.equalsIgnoreCase("emergency")) {
+                    type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
+                } else if ("1".equals(trimmed) || trimmed.contains("ปกติ") || trimmed.equalsIgnoreCase("normal")) {
+                    type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
+                }
+            }
+        }
+
+        if (type == null) {
+            String combinedText = ((addReportDto.getName() != null ? addReportDto.getName() : "") + " " + (addReportDto.getDescription() != null ? addReportDto.getDescription() : "")).toLowerCase();
+            if (combinedText.contains("ร้ายแรง") || combinedText.contains("ฉุกเฉิน") || combinedText.contains("emergency") || combinedText.contains("danger") || combinedText.contains("help")) {
+                type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
+            } else {
+                type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
+            }
+        }
 
         if (user != null) {
             Report addReport = Report.builder()
@@ -100,8 +125,17 @@ public class ReportServiceImpl implements ReportService {
                     .build();
             replyReportService.addReplyReport(replyReport, saved);
 
+            String typeNameStr = (type != null && type.getTypeName() != null) 
+                    ? type.getTypeName() 
+                    : "ปกติ";
+
+            boolean isSevere = (type != null && type.getTypeId() != null && type.getTypeId() == 2) 
+                    || "ร้ายแรง".equals(typeNameStr);
+
+            String titlePrefix = isSevere ? "🚨 แจ้งเตือนเหตุฉุกเฉินด่วน (ร้ายแรง)" : "มีรายงานปัญหาใหม่ (ปกติ)";
+
             notificationService.sendParkNotification(park,
-                    "มีรายงานปัญหาใหม่ (" + type.getTypeName() + ")",
+                    titlePrefix,
                     addReport.getName() + ": " + addReport.getDescription(),
                     saved);
 

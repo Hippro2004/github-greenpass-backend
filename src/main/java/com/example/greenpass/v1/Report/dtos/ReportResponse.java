@@ -26,4 +26,5 @@ public class ReportResponse {
     private String username;
     private String image;
     private String parkRangerName;
+    private String typeName;
 }
