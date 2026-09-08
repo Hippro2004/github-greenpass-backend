@@ -54,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        if (user != null && user.getUsername() != null) {
+        if (user != null && user.getUsername() != null) {ให้ฝั่ง Mobile เชื่อมต่อ WebSocket STOMP ไปยัง URL: http://<IP_ADDRESS>:8081/api/v1/ws-greenpass แล้ว Subscribe ที่หัวข้อ: /topic/user/{username}/notifications เมื่อมีสัญญาณเข้ามา ให้สั่ง fetchMyReports() หรืออัปเดต State ในหน้าจอทันที
             String uname = user.getUsername();
             messagingTemplate.convertAndSend("/topic/user/" + uname + "/notifications", saved);
             messagingTemplate.convertAndSend("/topic/user/" + uname.toLowerCase() + "/notifications", saved);
