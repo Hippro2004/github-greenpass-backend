@@ -54,8 +54,13 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification saved = notificationRepository.save(notification);
 
-        String destination = "/topic/user/" + user.getUsername() + "/notifications";
-        messagingTemplate.convertAndSend(destination, saved);
+        if (user != null && user.getUsername() != null) {
+            String uname = user.getUsername();
+            messagingTemplate.convertAndSend("/topic/user/" + uname + "/notifications", saved);
+            messagingTemplate.convertAndSend("/topic/user/" + uname.toLowerCase() + "/notifications", saved);
+            messagingTemplate.convertAndSend("/topic/user/notifications", saved);
+            messagingTemplate.convertAndSend("/topic/notifications", saved);
+        }
 
         if (user != null && user.getFcmToken() != null && !user.getFcmToken().isBlank()) {
             try {

@@ -194,13 +194,16 @@ public class ReportServiceImpl implements ReportService {
                     .build();
             replyReportService.addReplyReport(replyReport, report);
 
-            User reportOwner = report.getUser();
+            String thaiStatus = "Pending".equals(status) ? "แจ้งรายงาน" : "InProgress".equals(status) ? "กำลังดำเนินการ" : "Completed".equals(status) ? "ดำเนินการแก้ไขสำเร็จ" : status;
 
-            notificationService.sendUserNotification(
-                    reportOwner,
-                    "อัปเดตสถานะรายงาน (" + status + ")",
-                    "รายงาน '" + report.getName() + "' ของคุณได้รับการเปลี่ยนสถานะเป็น " + status,
-                    report);
+            User reportOwner = report.getUser();
+            if (reportOwner != null) {
+                notificationService.sendUserNotification(
+                        reportOwner,
+                        "อัปเดตสถานะรายงาน (" + thaiStatus + ")",
+                        "รายงาน '" + report.getName() + "' ของคุณได้รับการเปลี่ยนสถานะเป็น " + thaiStatus,
+                        report);
+            }
 
             return mapToResponse(report);
 
