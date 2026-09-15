@@ -134,6 +134,20 @@ public class ParkController {
                         if (body.get("status") != null) existing.setStatus(body.get("status").toString());
                         if (body.get("eventNote") != null) existing.setEventNote(body.get("eventNote").toString());
                         if (body.get("image") != null) existing.setImage(body.get("image").toString());
+                        if (body.get("openTime") != null && !body.get("openTime").toString().trim().isEmpty()) {
+                                try {
+                                        String ot = body.get("openTime").toString().trim();
+                                        if (ot.length() == 5) ot = ot + ":00";
+                                        existing.setOpenTime(java.time.LocalTime.parse(ot));
+                                } catch (Exception ignored) {}
+                        }
+                        if (body.get("closeTime") != null && !body.get("closeTime").toString().trim().isEmpty()) {
+                                try {
+                                        String ct = body.get("closeTime").toString().trim();
+                                        if (ct.length() == 5) ct = ct + ":00";
+                                        existing.setCloseTime(java.time.LocalTime.parse(ct));
+                                } catch (Exception ignored) {}
+                        }
 
                         Park saved = parkService.saveOrUpdatePark(existing);
                         return new ResponseEntity<>(
