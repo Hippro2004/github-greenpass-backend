@@ -9,18 +9,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.User.dtos.LoginUserDto;
 import com.example.greenpass.v1.User.dtos.RegisterUserDto;
+import com.example.greenpass.v1.User.dtos.ResponseUsernameDto;
 import com.example.greenpass.v1.User.dtos.UpdateUserDto;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -64,7 +67,8 @@ public class UserController {
             User user = userService.getUserByUsername(loginUserDto.getUsername());
             if (user != null) {
                 if (user.getPassword().equals(loginUserDto.getPassword())) {
-                    return new ResponseEntity<>(new ResponseObject(true, "User Login Successfully", user),
+                    ResponseUsernameDto response = new ResponseUsernameDto(user.getUsername());
+                    return new ResponseEntity<>(new ResponseObject(true, "User Login Successfully", response),
                             HttpStatus.OK);
                 }
                 return new ResponseEntity<>(new ResponseObject(false, "Password incorrect", null),
@@ -76,6 +80,21 @@ public class UserController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to Login",
                     null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ResponseObject> getProfile(@RequestHeader("username") String username) {
+        try {
+            UpdateUserDto userDto = userService.editProfileUserDto(username);
+            if (userDto == null) {
+                return new ResponseEntity<>(new ResponseObject(false, "User not found", null),
+                        HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(new ResponseObject(true, "User found", userDto), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to get user", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

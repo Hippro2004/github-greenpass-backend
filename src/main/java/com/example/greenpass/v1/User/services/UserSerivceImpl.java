@@ -21,6 +21,27 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
+    public UpdateUserDto editProfileUserDto(String username) {
+        User user = getUserByUsername(username);
+        if (user == null) {
+            return null;
+        }
+        UpdateUserDto updateUserDto = new UpdateUserDto();
+        updateUserDto.setFirstname(user.getFirstname());
+        updateUserDto.setLastname(user.getLastname());
+        updateUserDto.setEmail(user.getEmail());
+        updateUserDto.setPhone(user.getPhone());
+        updateUserDto.setBirthDate(user.getBirthDate());
+        updateUserDto.setGender(user.getGender());
+        updateUserDto.setForeigner(user.isForeigner());
+        updateUserDto.setDistrict(user.getDistrict());
+        updateUserDto.setSubDistrict(user.getSubDistrict());
+        updateUserDto.setProvince(user.getProvince());
+        updateUserDto.setZipcode(user.getZipcode());
+        return updateUserDto;
+    }
+
+    @Override
     public void registerUser(RegisterUserDto registerUserDto) {
         User toSaveUser = User.builder()
                 .username(registerUserDto.getUsername())

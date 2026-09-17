@@ -1,6 +1,5 @@
 package com.example.greenpass.v1.FileUpload.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,9 +45,9 @@ public class FileUploadController {
 
         // Sanitize category name (allowed: rewards, announcements, reports, general)
         String cleanCategory = category.toLowerCase().trim();
-        if (!cleanCategory.equals("rewards") && 
-            !cleanCategory.equals("announcements") && 
-            !cleanCategory.equals("reports")) {
+        if (!cleanCategory.equals("rewards") &&
+                !cleanCategory.equals("announcements") &&
+                !cleanCategory.equals("reports")) {
             cleanCategory = "general";
         }
 
@@ -58,7 +57,8 @@ public class FileUploadController {
             Files.createDirectories(categoryPath);
 
             // Generate clean unique file name
-            String originalFileName = StringUtils.cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "image.jpg");
+            String originalFileName = StringUtils
+                    .cleanPath(file.getOriginalFilename() != null ? file.getOriginalFilename() : "image.jpg");
             String extension = "";
             int dotIndex = originalFileName.lastIndexOf(".");
             if (dotIndex >= 0) {
@@ -67,7 +67,8 @@ public class FileUploadController {
                 extension = ".jpg";
             }
 
-            String newFileName = System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            String newFileName = System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8)
+                    + extension;
             Path targetLocation = categoryPath.resolve(newFileName);
 
             // Copy file to target location

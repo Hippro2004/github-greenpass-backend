@@ -9,6 +9,8 @@ public interface UserService {
 
     User getUserByUsername(String username);
 
+    UpdateUserDto editProfileUserDto(String username);
+
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
