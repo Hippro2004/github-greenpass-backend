@@ -22,5 +22,7 @@ public interface ReportService {
     List<ReportResponse> getReportsByRangerUsername(String rangerUsername);
 
     ReportResponse updateReportStatus(int reportId, String status, String rangerUsername);
+
+    ReportResponse updateReportStatus(int reportId, String status, String progress, String image, String rangerUsername);
 }
 

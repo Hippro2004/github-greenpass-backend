@@ -108,7 +108,9 @@ public class ReportController {
             @RequestHeader(value = "username", required = false) String username) {
         try {
             String status = payload.get("status");
-            ReportResponse updated = reportService.updateReportStatus(id, status, username);
+            String progress = payload.get("progress");
+            String image = payload.get("image");
+            ReportResponse updated = reportService.updateReportStatus(id, status, progress, image, username);
             if (updated == null) {
                 return new ResponseEntity<>(new ResponseObject(false, "Report not found for update", null),
                         HttpStatus.NOT_FOUND);

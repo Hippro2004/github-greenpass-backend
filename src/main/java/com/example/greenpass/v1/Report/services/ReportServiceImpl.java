@@ -173,6 +173,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResponse updateReportStatus(int reportId, String status, String rangerUsername) {
+        return updateReportStatus(reportId, status, null, null, rangerUsername);
+    }
+
+    @Override
+    public ReportResponse updateReportStatus(int reportId, String status, String progress, String image, String rangerUsername) {
         Report report = reportRepository.findByReportId(reportId).orElse(null);
         if (report != null) {
             report.setStatus(status);
@@ -183,12 +188,15 @@ public class ReportServiceImpl implements ReportService {
                 ranger = parkRangerRepository.findByUsername(rangerUsername);
             }
 
+            String progressText = (progress != null && !progress.isBlank()) ? progress : ("Status updated to " + status);
+            String progressImage = (image != null && !image.isBlank()) ? image : report.getImage();
+
             ReplyReport replyReport = ReplyReport.builder()
                     .updateDate(LocalDate.now())
                     .updateTime(LocalTime.now())
-                    .progress("Status updated to " + status)
+                    .progress(progressText)
                     .currentStatus(status)
-                    .image(report.getImage())
+                    .image(progressImage)
                     .report(report)
                     .parkRanger(ranger)
                     .build();
