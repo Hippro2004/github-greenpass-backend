@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
+import com.example.greenpass.v1.Notification.entities.Notification;
+import com.example.greenpass.v1.Notification.services.NotificationService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.v1.Stamp.dtos.ScanQrDto;
@@ -32,6 +34,7 @@ public class ScanCheckinQRcodeController {
     private final StampService stampService;
     private final ParkRangerService parkRangerService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @PostMapping(value = { "", "/scan", "/scan-checkin" })
     public ResponseEntity<ResponseObject> scanQr(@RequestBody ScanQrDto scanQrDto) {
@@ -49,7 +52,8 @@ public class ScanCheckinQRcodeController {
             if (token.contains(".")) {
                 if (jwtService.isTokenExpired(token)) {
                     return new ResponseEntity<>(
-                            new ResponseObject(false, "QR Code หมดอายุแล้ว กรุณาให้นักท่องเที่ยวรีเฟรช QR Code ใหม่", null),
+                            new ResponseObject(false, "QR Code หมดอายุแล้ว กรุณาให้นักท่องเที่ยวรีเฟรช QR Code ใหม่",
+                                    null),
                             HttpStatus.UNAUTHORIZED);
                 }
             }
@@ -98,6 +102,19 @@ public class ScanCheckinQRcodeController {
 
             // 5. Save stamp to database
             stampService.StampUser(username, parkRangerUsername);
+
+            String parkTitle = (ranger != null && ranger.getPark() != null)
+                    ? ranger.getPark().getName()
+                    : "อุทยานแห่งชาติ";
+            try {
+                notificationService.sendUserNotification(
+                        user,
+                        "สแกนสำเร็จ",
+                        "คุณได้รับแสตมป์ของ " + parkTitle + " เรียบร้อยแล้ว",
+                        null);
+            } catch (Exception ex) {
+                System.err.println("Failed to send scan notification: " + ex.getMessage());
+            }
 
             String fullName = (user.getFirstname() != null ? user.getFirstname() : "") + " "
                     + (user.getLastname() != null ? user.getLastname() : "");
