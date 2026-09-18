@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseUsernameDto {
+public class SessionDto {
     private String username;
+    private String firstname;
+    private String lastname;
 
 }

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.User.dtos.LoginUserDto;
 import com.example.greenpass.v1.User.dtos.RegisterUserDto;
-import com.example.greenpass.v1.User.dtos.ResponseUsernameDto;
+import com.example.greenpass.v1.User.dtos.SessionDto;
 import com.example.greenpass.v1.User.dtos.UpdateUserDto;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
@@ -67,7 +67,7 @@ public class UserController {
             User user = userService.getUserByUsername(loginUserDto.getUsername());
             if (user != null) {
                 if (user.getPassword().equals(loginUserDto.getPassword())) {
-                    ResponseUsernameDto response = new ResponseUsernameDto(user.getUsername());
+                    SessionDto response = new SessionDto(user.getUsername(), user.getFirstname(), user.getLastname());
                     return new ResponseEntity<>(new ResponseObject(true, "User Login Successfully", response),
                             HttpStatus.OK);
                 }
