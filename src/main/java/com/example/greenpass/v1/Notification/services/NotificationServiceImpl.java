@@ -52,8 +52,15 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(user)
                 .build();
 
-        Notification saved = notificationRepository.save(notification);
+        Notification saved = null;
+        try {
+            saved = notificationRepository.save(notification);
+        } catch (Exception e) {
+            System.err.println("Could not save notification to DB: " + e.getMessage());
+            saved = notification; // ถ้าเซฟลง DB ไม่ได้ ก็ยังให้ส่ง WebSocket ต่อได้
+        }
 
+        // ส่ง WebSocket เสมอ
         if (user != null && user.getUsername() != null) {
             String uname = user.getUsername();
             messagingTemplate.convertAndSend("/topic/user/" + uname + "/notifications", saved);
@@ -62,7 +69,8 @@ public class NotificationServiceImpl implements NotificationService {
             messagingTemplate.convertAndSend("/topic/notifications", saved);
         }
 
-        if (user != null && user.getFcmToken() != null && !user.getFcmToken().isBlank()) {
+        // เช็ค report != null ก่อนส่ง Firebase
+        if (user != null && user.getFcmToken() != null && !user.getFcmToken().isBlank() && report != null) {
             try {
                 Message fcmMessage = Message.builder()
                         .setToken(user.getFcmToken())
@@ -74,12 +82,10 @@ public class NotificationServiceImpl implements NotificationService {
                         .build();
 
                 FirebaseMessaging.getInstance().send(fcmMessage);
-
             } catch (Exception e) {
                 System.err.println("Failed to send Firebase notification: " + e.getMessage());
             }
         }
-
     }
 
     @Override

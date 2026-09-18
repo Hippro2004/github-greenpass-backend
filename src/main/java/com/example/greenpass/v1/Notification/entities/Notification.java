@@ -44,7 +44,7 @@ public class Notification {
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name = "reportId", nullable = false)
+    @JoinColumn(name = "reportId", nullable = true)
     private Report report;
 
     @ManyToOne
