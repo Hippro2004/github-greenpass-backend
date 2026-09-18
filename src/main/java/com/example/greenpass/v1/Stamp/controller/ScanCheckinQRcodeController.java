@@ -89,9 +89,31 @@ public class ScanCheckinQRcodeController {
             }
 
             // 4. Check duplicate scan within 2 hours (same user, same park, within 2 hours)
+            // if (ranger != null && ranger.getPark() != null
+            // && stampService.hasUserBeenStampedWithinHours(username,
+            // ranger.getPark().getParkId(), 2)) {
+            // String parkTitle = ranger.getPark().getName();
+            // return new ResponseEntity<>(
+            // new ResponseObject(false,
+            // "นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ " + parkTitle
+            // + " ไปแล้ว ไม่สามารถสแกนซ้ำได้ภายใน 2 ชั่วโมง",
+            // null),
+            // HttpStatus.BAD_REQUEST);
+            // }
+
             if (ranger != null && ranger.getPark() != null
                     && stampService.hasUserBeenStampedWithinHours(username, ranger.getPark().getParkId(), 2)) {
                 String parkTitle = ranger.getPark().getName();
+
+                // 👉 ส่งแจ้งเตือนบอก Mobile ด้วยว่าเคยสแกนไปแล้ว
+                try {
+                    notificationService.sendUserNotification(
+                            user,
+                            "แจ้งเตือนการสแกน",
+                            "คุณได้รับสแตมป์ของ " + parkTitle + " ไปแล้ว ไม่สามารถรับซ้ำได้ภายใน 2 ชั่วโมง",
+                            null);
+                } catch (Exception ignored) {
+                }
                 return new ResponseEntity<>(
                         new ResponseObject(false,
                                 "นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ " + parkTitle

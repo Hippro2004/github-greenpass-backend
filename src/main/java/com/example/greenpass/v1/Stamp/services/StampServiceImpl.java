@@ -53,10 +53,12 @@ public class StampServiceImpl implements StampService {
         ParkRanger parkRanger = parkRangerService.getParkRangerByUsername(parkrangerUsername);
         Park park = parkRanger.getPark();
 
-        if (park != null && hasUserBeenStampedWithinHours(username, park.getParkId(), 2)) {
-            throw new IllegalStateException("นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ " + park.getName()
-                    + " ไปแล้ว ไม่สามารถสแกนซ้ำได้ภายใน 2 ชั่วโมง");
-        }
+        // if (park != null && hasUserBeenStampedWithinHours(username, park.getParkId(),
+        // 2)) {
+        // throw new IllegalStateException("นักท่องเที่ยวรายนี้ได้รับสแตมป์ของ " +
+        // park.getName()
+        // + " ไปแล้ว ไม่สามารถสแกนซ้ำได้ภายใน 2 ชั่วโมง");
+        // }
 
         Stamp newStamp = Stamp.builder()
                 .stampDate(LocalDate.now())
