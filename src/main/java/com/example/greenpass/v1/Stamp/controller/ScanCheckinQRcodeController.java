@@ -123,7 +123,7 @@ public class ScanCheckinQRcodeController {
             }
 
             // 5. Save stamp to database
-            stampService.StampUser(username, parkRangerUsername);
+            stampService.stampUser(username, parkRangerUsername);
 
             String parkTitle = (ranger != null && ranger.getPark() != null)
                     ? ranger.getPark().getName()

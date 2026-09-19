@@ -75,16 +75,7 @@ public class StampController {
     @GetMapping("/my-stamps")
     public ResponseEntity<ResponseObject> getMyStamps(@RequestHeader("username") String username) {
         try {
-            List<Stamp> rawStamps = stampService.getAllStampsByUsername(username);
-            List<StampResponse> stamps = rawStamps.stream()
-                    .filter(stamp -> stamp != null && stamp.getPark() != null)
-                    .map(stamp -> new StampResponse(
-                            stamp.getStampId(),
-                            stamp.getStampDate(),
-                            stamp.getTime(),
-                            stamp.getPark().getParkId(),
-                            stamp.getPark().getName()))
-                    .toList();
+            List<StampResponse> stamps = stampService.getAllStampsByUsername(username);
             return new ResponseEntity<>(
                     new ResponseObject(true, "Success", stamps),
                     HttpStatus.OK);

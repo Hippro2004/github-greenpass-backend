@@ -16,6 +16,7 @@ import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
+import com.example.greenpass.v1.Stamp.dtos.StampResponse;
 import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse;
 import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse.HistoryItem;
 import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse.PeriodStatistics;
@@ -33,8 +34,20 @@ public class StampServiceImpl implements StampService {
     private final StampRepository stampRepository;
 
     @Override
-    public List<Stamp> getAllStampsByUsername(String username) {
-        return stampRepository.findAllByUserUsername(username);
+    public List<StampResponse> getAllStampsByUsername(String username) {
+        List<StampResponse> responses = new ArrayList<>();
+        stampRepository.findAllByUserUsername(username).stream()
+                .filter(stamp -> stamp != null && stamp.getPark() != null && stamp.getParkRanger() != null)
+                .forEach(stamp -> responses.add(StampResponse.builder()
+                        .stampId(stamp.getStampId())
+                        .stampDate(stamp.getStampDate())
+                        .time(stamp.getTime())
+                        .parkName(stamp.getPark().getName())
+                        .parkRangerName(
+                                stamp.getParkRanger().getFirstname() + " " + stamp.getParkRanger().getSurname())
+                        .signature(stamp.getParkRanger().getSignature())
+                        .build()));
+        return responses;
     }
 
     @Override
@@ -48,7 +61,7 @@ public class StampServiceImpl implements StampService {
     }
 
     @Override
-    public void StampUser(String username, String parkrangerUsername) {
+    public void stampUser(String username, String parkrangerUsername) {
         User user = userService.getUserByUsername(username);
         ParkRanger parkRanger = parkRangerService.getParkRangerByUsername(parkrangerUsername);
         Park park = parkRanger.getPark();
