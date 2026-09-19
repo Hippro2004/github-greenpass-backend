@@ -46,6 +46,7 @@ public class Report {
     @Column(nullable = false)
     private String description;
 
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     @Column(nullable = false)

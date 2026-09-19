@@ -39,7 +39,7 @@ public class Announcement {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String image;
 
     @ManyToOne
