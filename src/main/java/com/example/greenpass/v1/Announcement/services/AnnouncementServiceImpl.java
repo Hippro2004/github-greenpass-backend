@@ -13,6 +13,7 @@ import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
+import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,7 +36,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                         announcement.getDescription(),
                         announcement.getPark().getName(),
                         announcement.getPark().getParkId(),
-                        announcement.getImage()))
+                        FileUtils.extractFileName(announcement.getImage(), "announcements")))
                 .toList();
     }
 
@@ -51,7 +52,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                 announcement.getDescription(),
                 announcement.getPark() != null ? announcement.getPark().getName() : "อุทยานแห่งชาติ",
                 announcement.getPark() != null ? announcement.getPark().getParkId() : 1,
-                announcement.getImage());
+                FileUtils.extractFileName(announcement.getImage(), "announcements"));
     }
 
     @Override
@@ -78,9 +79,12 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             }
         }
 
-        String image = "src/news1.jpg";
+        String image = "news1.jpg";
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            image = dto.getImage().trim();
+            String extracted = FileUtils.extractFileName(dto.getImage().trim(), "announcements");
+            if (extracted != null && !extracted.isEmpty()) {
+                image = extracted;
+            }
         }
 
         Announcement announcement = Announcement.builder()
@@ -95,7 +99,13 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public void deleteAnnouncement(int id) {
-        announcementRepository.deleteById(id);
+        Announcement announcement = announcementRepository.findById(id).orElse(null);
+        if (announcement != null) {
+            if (announcement.getImage() != null) {
+                FileUtils.deleteFile(announcement.getImage(), "announcements");
+            }
+            announcementRepository.delete(announcement);
+        }
     }
 
     @Override
@@ -117,7 +127,13 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            announcement.setImage(dto.getImage().trim());
+            String extracted = FileUtils.extractFileName(dto.getImage().trim(), "announcements");
+            if (extracted != null && !extracted.isEmpty()) {
+                if (announcement.getImage() != null && !announcement.getImage().equals(extracted)) {
+                    FileUtils.deleteFile(announcement.getImage(), "announcements");
+                }
+                announcement.setImage(extracted);
+            }
         }
 
         return announcementRepository.save(announcement);

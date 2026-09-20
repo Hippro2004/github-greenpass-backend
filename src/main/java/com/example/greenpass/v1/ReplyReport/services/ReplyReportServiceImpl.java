@@ -8,6 +8,7 @@ import com.example.greenpass.v1.ReplyReport.dtos.ReplyReportResponse;
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
 import com.example.greenpass.v1.ReplyReport.repositories.ReplyReporyRepository;
 import com.example.greenpass.v1.Report.entities.Report;
+import com.example.greenpass.utils.FileUtils;
 
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class ReplyReportServiceImpl implements ReplyReportService {
                 .updateTime(replyReport.getUpdateTime())
                 .progress(replyReport.getProgress())
                 .currentStatus(replyReport.getCurrentStatus())
-                .image(replyReport.getImage())
+                .image(FileUtils.extractFileName(replyReport.getImage(), "reports"))
                 .report(report)
                 .parkRanger(replyReport.getParkRanger())
                 .build();
@@ -41,7 +42,7 @@ public class ReplyReportServiceImpl implements ReplyReportService {
                     .updateTime(e.getUpdateTime())
                     .progress(e.getProgress())
                     .currentStatus(e.getCurrentStatus())
-                    .image(e.getImage())
+                    .image(FileUtils.extractFileName(e.getImage(), "reports"))
                     .parkRangerName(e.getParkRanger() != null ? e.getParkRanger().getFirstname() : null)
                     .build();
         }).toList();
