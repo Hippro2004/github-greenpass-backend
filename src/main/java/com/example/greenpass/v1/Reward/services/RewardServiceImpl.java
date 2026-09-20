@@ -20,7 +20,17 @@ public class RewardServiceImpl implements RewardService {
     @Override
     public List<Reward> getAllReward() {
         return rewardRepository.findAll().stream().peek(r -> {
-            r.setImage(FileUtils.extractFileName(r.getImage(), "rewards"));
+            if (r.getImage() != null && r.getImage().startsWith("data:image")) {
+                try {
+                    String cleanName = FileUtils.extractFileName(r.getImage(), "rewards");
+                    if (cleanName != null) {
+                        r.setImage(cleanName);
+                        rewardRepository.save(r);
+                    }
+                } catch (Exception e) {}
+            } else if (r.getImage() != null) {
+                r.setImage(FileUtils.extractFileName(r.getImage(), "rewards"));
+            }
         }).toList();
     }
 
@@ -28,7 +38,17 @@ public class RewardServiceImpl implements RewardService {
     public Reward getRewardById(int id) {
         Reward reward = rewardRepository.findByRewardId(id).orElse(null);
         if (reward != null) {
-            reward.setImage(FileUtils.extractFileName(reward.getImage(), "rewards"));
+            if (reward.getImage() != null && reward.getImage().startsWith("data:image")) {
+                try {
+                    String cleanName = FileUtils.extractFileName(reward.getImage(), "rewards");
+                    if (cleanName != null) {
+                        reward.setImage(cleanName);
+                        rewardRepository.save(reward);
+                    }
+                } catch (Exception e) {}
+            } else if (reward.getImage() != null) {
+                reward.setImage(FileUtils.extractFileName(reward.getImage(), "rewards"));
+            }
         }
         return reward;
     }

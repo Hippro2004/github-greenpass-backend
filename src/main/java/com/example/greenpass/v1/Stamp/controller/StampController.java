@@ -36,10 +36,11 @@ public class StampController {
             int expireMinutes = 5;
             String token = jwtService.generateToken(username, expireMinutes);
             String qrBase64 = qrService.generateQr(token);
-            long expireAt = System.currentTimeMillis() + (expireMinutes * 60 * 1000L);
+            long expiresInSeconds = expireMinutes * 60L;
+            long expireAt = System.currentTimeMillis() + (expiresInSeconds * 1000L);
 
             return new ResponseEntity<>(
-                    new ResponseObject(true, "QR generated", new QrResponse(qrBase64, expireAt)),
+                    new ResponseObject(true, "QR generated", new QrResponse(qrBase64, expireAt, expiresInSeconds)),
                     HttpStatus.OK);
 
         } catch (Exception e) {

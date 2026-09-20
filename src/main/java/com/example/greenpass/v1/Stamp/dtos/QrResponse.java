@@ -12,4 +12,11 @@ import lombok.NoArgsConstructor;
 public class QrResponse {
     private String qrBase64;
     private long expireAt;
+    private long expiresInSeconds;
+
+    public QrResponse(String qrBase64, long expireAt) {
+        this.qrBase64 = qrBase64;
+        this.expireAt = expireAt;
+        this.expiresInSeconds = 300;
+    }
 }
