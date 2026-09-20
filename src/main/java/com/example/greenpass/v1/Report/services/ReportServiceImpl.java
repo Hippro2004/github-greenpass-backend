@@ -22,6 +22,7 @@ import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
 import com.example.greenpass.v1.ReportType.repositories.ReportTypeRepository;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
+import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,7 +55,7 @@ public class ReportServiceImpl implements ReportService {
                 .parkId(r.getPark() != null ? r.getPark().getParkId() : 0)
                 .parkName(r.getPark() != null ? r.getPark().getName() : "")
                 .username(r.getUser() != null ? r.getUser().getUsername() : "")
-                .image(r.getImage())
+                .image(FileUtils.extractFileName(r.getImage(), "reports"))
                 .parkRangerName(rangerName)
                 .typeName(r.getType() != null ? r.getType().getTypeName() : "ปกติ")
                 .build();
@@ -101,13 +102,14 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (user != null) {
+            String cleanImage = FileUtils.extractFileName(addReportDto.getImage(), "reports");
             Report addReport = Report.builder()
                     .name(addReportDto.getName())
                     .description(addReportDto.getDescription())
                     .reportDate(LocalDate.now())
                     .reportTime(LocalTime.now())
                     .status("Pending")
-                    .image(addReportDto.getImage())
+                    .image(cleanImage)
                     .park(park)
                     .user(user)
                     .type(type)
@@ -119,7 +121,7 @@ public class ReportServiceImpl implements ReportService {
                     .updateTime(saved.getReportTime())
                     .progress(null)
                     .currentStatus(addReport.getStatus())
-                    .image(addReport.getImage())
+                    .image(cleanImage)
                     .report(saved)
                     .parkRanger(null)
                     .build();
@@ -145,7 +147,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Report getByReportId(int id) {
-        return reportRepository.findByReportId(id).orElse(null);
+        Report report = reportRepository.findByReportId(id).orElse(null);
+        if (report != null) {
+            report.setImage(FileUtils.extractFileName(report.getImage(), "reports"));
+        }
+        return report;
     }
 
     @Override
@@ -189,7 +195,9 @@ public class ReportServiceImpl implements ReportService {
             }
 
             String progressText = (progress != null && !progress.isBlank()) ? progress : ("Status updated to " + status);
-            String progressImage = (image != null && !image.isBlank()) ? image : report.getImage();
+            String progressImage = (image != null && !image.isBlank())
+                    ? FileUtils.extractFileName(image, "reports")
+                    : FileUtils.extractFileName(report.getImage(), "reports");
 
             ReplyReport replyReport = ReplyReport.builder()
                     .updateDate(LocalDate.now())

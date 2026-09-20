@@ -82,6 +82,7 @@ public class FileUploadController {
 
             Map<String, String> responseData = new HashMap<>();
             responseData.put("fileName", newFileName);
+            responseData.put("image", newFileName);
             responseData.put("category", cleanCategory);
             responseData.put("fileUrl", relativeUrl);
             responseData.put("fullUrl", fullUrl);
