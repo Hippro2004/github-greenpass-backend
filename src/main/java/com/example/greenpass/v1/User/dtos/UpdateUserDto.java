@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 public class UpdateUserDto {
     private String firstname;
     private String lastname;
+    private String profileImage;
     private String email;
     private String phone;
     private LocalDate birthDate;

@@ -47,7 +47,8 @@ public class FileUploadController {
         String cleanCategory = category.toLowerCase().trim();
         if (!cleanCategory.equals("rewards") &&
                 !cleanCategory.equals("announcements") &&
-                !cleanCategory.equals("reports")) {
+                !cleanCategory.equals("reports") &&
+                !cleanCategory.equals("users")) {
             cleanCategory = "general";
         }
 

@@ -38,6 +38,7 @@ public class UserSerivceImpl implements UserService {
         updateUserDto.setSubDistrict(user.getSubDistrict());
         updateUserDto.setProvince(user.getProvince());
         updateUserDto.setZipcode(user.getZipcode());
+        updateUserDto.setProfileImage(user.getProfileImage());
         return updateUserDto;
     }
 
@@ -67,6 +68,7 @@ public class UserSerivceImpl implements UserService {
         User user = getUserByUsername(username);
         user.setFirstname(dto.getFirstname());
         user.setLastname(dto.getLastname());
+        user.setProfileImage(dto.getProfileImage());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
         user.setBirthDate(dto.getBirthDate());
