@@ -7,11 +7,13 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UpdateUserDto {
     private String firstname;
     private String lastname;
