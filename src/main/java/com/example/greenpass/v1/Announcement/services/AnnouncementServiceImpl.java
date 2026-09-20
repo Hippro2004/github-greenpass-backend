@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
@@ -14,7 +13,6 @@ import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
-import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,39 +28,16 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             return null;
         String img = announcement.getImage();
 
-        // 1. หากไม่มีรูป หรือเป็น mock เก่า "src/news1.jpg" ให้ใช้รูปของอุทยานนั้นๆ
-        // หรือรูปธรรมชาติจริง
-        if (img == null || img.trim().isEmpty() || img.contains("src/news1.jpg")) {
-            if (announcement.getPark() != null && announcement.getPark().getImage() != null
-                    && !announcement.getPark().getImage().isBlank()) {
-                return announcement.getPark().getImage();
-            }
-            return "https://images.unsplash.com/photo-1511497584788-8767611136f6?auto=format&fit=crop&w=1200&q=80";
-        }
-
         img = img.trim();
-
-        // 2. หากเป็น Full URL (http, https, data:image) อยู่แล้ว ให้ส่งออกตามปกติ
         if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:image")) {
             return img;
         }
 
-        // 3. หากเป็นชื่อไฟล์เดี่ยวๆ ให้เติม path /uploads/announcements/
         if (!img.contains("/")) {
-            img = "/uploads/announcements/" + img;
-        } else if (!img.startsWith("/")) {
-            img = "/" + img;
+            return "/uploads/announcements/" + img;
         }
 
-        // 4. แปลง Relative path เป็น Full URL อัตโนมัติ (เช่น
-        // http://192.168.1.10:8081/api/v1/uploads/...)
-        try {
-            return ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path(img)
-                    .toUriString();
-        } catch (Exception e) {
-            return img;
-        }
+        return img.startsWith("/") ? img : "/" + img;
     }
 
     @Override
@@ -77,7 +52,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                         announcement.getDescription(),
                         announcement.getPark().getName(),
                         announcement.getPark().getParkId(),
-                        FileUtils.extractFileName(announcement.getImage(), "announcements")))
+                        formatImage(announcement)))
                 .toList();
     }
 
@@ -93,7 +68,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                 announcement.getDescription(),
                 announcement.getPark() != null ? announcement.getPark().getName() : "อุทยานแห่งชาติ",
                 announcement.getPark() != null ? announcement.getPark().getParkId() : 1,
-                FileUtils.extractFileName(announcement.getImage(), "announcements"));
+                formatImage(announcement));
     }
 
     @Override
@@ -120,12 +95,9 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             }
         }
 
-        String image = "news1.jpg";
+        String image = "src/news1.jpg";
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            String extracted = FileUtils.extractFileName(dto.getImage().trim(), "announcements");
-            if (extracted != null && !extracted.isEmpty()) {
-                image = extracted;
-            }
+            image = dto.getImage().trim();
         }
 
         Announcement announcement = Announcement.builder()
@@ -140,13 +112,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public void deleteAnnouncement(int id) {
-        Announcement announcement = announcementRepository.findById(id).orElse(null);
-        if (announcement != null) {
-            if (announcement.getImage() != null) {
-                FileUtils.deleteFile(announcement.getImage(), "announcements");
-            }
-            announcementRepository.delete(announcement);
-        }
+        announcementRepository.deleteById(id);
     }
 
     @Override
@@ -168,13 +134,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            String extracted = FileUtils.extractFileName(dto.getImage().trim(), "announcements");
-            if (extracted != null && !extracted.isEmpty()) {
-                if (announcement.getImage() != null && !announcement.getImage().equals(extracted)) {
-                    FileUtils.deleteFile(announcement.getImage(), "announcements");
-                }
-                announcement.setImage(extracted);
-            }
+            announcement.setImage(dto.getImage().trim());
         }
 
         return announcementRepository.save(announcement);
