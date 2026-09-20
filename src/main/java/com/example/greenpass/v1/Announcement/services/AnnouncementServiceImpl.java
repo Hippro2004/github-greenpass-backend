@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
@@ -23,6 +24,43 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     private final ParkRangerRepository parkRangerRepository;
     private final ParkService parkService;
 
+    private String formatImage(Announcement announcement) {
+        if (announcement == null)
+            return null;
+        String img = announcement.getImage();
+
+        // 1. หากไม่มีรูป หรือเป็น mock เก่า "src/news1.jpg" ให้ใช้รูปของอุทยานนั้นๆ หรือรูปธรรมชาติจริง
+        if (img == null || img.trim().isEmpty() || img.contains("src/news1.jpg")) {
+            if (announcement.getPark() != null && announcement.getPark().getImage() != null && !announcement.getPark().getImage().isBlank()) {
+                return announcement.getPark().getImage();
+            }
+            return "https://images.unsplash.com/photo-1511497584788-8767611136f6?auto=format&fit=crop&w=1200&q=80";
+        }
+
+        img = img.trim();
+
+        // 2. หากเป็น Full URL (http, https, data:image) อยู่แล้ว ให้ส่งออกตามปกติ
+        if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:image")) {
+            return img;
+        }
+
+        // 3. หากเป็นชื่อไฟล์เดี่ยวๆ ให้เติม path /uploads/announcements/
+        if (!img.contains("/")) {
+            img = "/uploads/announcements/" + img;
+        } else if (!img.startsWith("/")) {
+            img = "/" + img;
+        }
+
+        // 4. แปลง Relative path เป็น Full URL อัตโนมัติ (เช่น http://192.168.1.10:8081/api/v1/uploads/...)
+        try {
+            return ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path(img)
+                    .toUriString();
+        } catch (Exception e) {
+            return img;
+        }
+    }
+
     @Override
     public List<AnnouncementResponse> getAllAnnouncements() {
         return announcementRepository.findAll().stream()
@@ -35,7 +73,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                         announcement.getDescription(),
                         announcement.getPark().getName(),
                         announcement.getPark().getParkId(),
-                        announcement.getImage()))
+                        formatImage(announcement)))
                 .toList();
     }
 
@@ -51,7 +89,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                 announcement.getDescription(),
                 announcement.getPark() != null ? announcement.getPark().getName() : "อุทยานแห่งชาติ",
                 announcement.getPark() != null ? announcement.getPark().getParkId() : 1,
-                announcement.getImage());
+                formatImage(announcement));
     }
 
     @Override
