@@ -36,6 +36,9 @@ public class RewardServiceImpl implements RewardService {
     @Override
     public Reward addReward(AddRewardDto dto) {
         String cleanImage = FileUtils.extractFileName(dto.getImage(), "rewards");
+        if (cleanImage == null || cleanImage.trim().isEmpty()) {
+            cleanImage = "reward1.jpg";
+        }
         Reward reward = Reward.builder()
                 .rewardTitle(dto.getRewardTitle())
                 .rewardDetails(dto.getRewardDetails())

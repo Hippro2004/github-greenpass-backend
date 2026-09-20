@@ -118,6 +118,47 @@ public class AnnouncementController {
         }
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<ResponseObject> updateAnnouncement(
+            @RequestParam(value = "id", required = false) String idStr,
+            @RequestParam(value = "announcementId", required = false) String announcementIdStr,
+            @RequestBody @Valid AddAnnouncementDto dto) {
+        try {
+            int targetId = 0;
+            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined") && !idStr.equalsIgnoreCase("null")) {
+                try {
+                    targetId = (int) Math.floor(Double.parseDouble(idStr.trim()));
+                } catch (Exception e) {}
+            } else if (announcementIdStr != null && !announcementIdStr.trim().isEmpty()) {
+                try {
+                    targetId = (int) Math.floor(Double.parseDouble(announcementIdStr.trim()));
+                } catch (Exception e) {}
+            }
+
+            if (targetId <= 0) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "Invalid announcement ID", null),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Announcement announcement = announcementService.updateAnnouncement(targetId, dto);
+            if (announcement == null) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "Announcement not found", null),
+                        HttpStatus.NOT_FOUND);
+            }
+
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "Announcement updated successfully", announcement),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to update announcement: " + e.getMessage(), null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/delete")
     public ResponseEntity<ResponseObject> deleteAnnouncementPost(
             @RequestParam(value = "id", required = false) String idStr,

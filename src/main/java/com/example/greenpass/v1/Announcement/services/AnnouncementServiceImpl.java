@@ -13,6 +13,7 @@ import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
+import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,26 +25,37 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     private final ParkService parkService;
 
     private String formatImage(Announcement announcement) {
-        if (announcement == null)
+        if (announcement == null || announcement.getImage() == null)
             return null;
-        String img = announcement.getImage();
+        String img = announcement.getImage().trim();
 
-        img = img.trim();
         if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:image")) {
             return img;
         }
 
-        if (!img.contains("/")) {
-            return "/uploads/announcements/" + img;
+        String cleanName = FileUtils.extractFileName(img, "announcements");
+        if (cleanName == null || cleanName.equalsIgnoreCase("news1.jpg") || cleanName.equalsIgnoreCase("src/news1.jpg")) {
+            return "/src/news1.jpg";
         }
 
-        return img.startsWith("/") ? img : "/" + img;
+        return "/uploads/announcements/" + cleanName;
     }
 
     @Override
     public List<AnnouncementResponse> getAllAnnouncements() {
         return announcementRepository.findAll().stream()
                 .filter(announcement -> announcement != null && announcement.getPark() != null)
+                .peek(announcement -> {
+                    if (announcement.getImage() != null && announcement.getImage().startsWith("data:image")) {
+                        try {
+                            String cleanName = FileUtils.extractFileName(announcement.getImage(), "announcements");
+                            if (cleanName != null) {
+                                announcement.setImage(cleanName);
+                                announcementRepository.save(announcement);
+                            }
+                        } catch (Exception e) {}
+                    }
+                })
                 .sorted((a, b) -> Integer.compare(b.getAnnouncementId(), a.getAnnouncementId()))
                 .map(announcement -> new AnnouncementResponse(
                         announcement.getAnnouncementId(),
@@ -61,6 +73,16 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
         if (announcement == null)
             return null;
+
+        if (announcement.getImage() != null && announcement.getImage().startsWith("data:image")) {
+            try {
+                String cleanName = FileUtils.extractFileName(announcement.getImage(), "announcements");
+                if (cleanName != null) {
+                    announcement.setImage(cleanName);
+                    announcementRepository.save(announcement);
+                }
+            } catch (Exception e) {}
+        }
         return new AnnouncementResponse(
                 announcement.getAnnouncementId(),
                 announcement.getAnnouncementTitle(),
@@ -95,16 +117,16 @@ public class AnnouncementServiceImpl implements AnnouncementService {
             }
         }
 
-        String image = "src/news1.jpg";
-        if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            image = dto.getImage().trim();
+        String cleanImage = FileUtils.extractFileName(dto.getImage(), "announcements");
+        if (cleanImage == null || cleanImage.trim().isEmpty()) {
+            cleanImage = "news1.jpg";
         }
 
         Announcement announcement = Announcement.builder()
                 .announcementTitle(dto.getTitle() != null ? dto.getTitle() : "ประกาศข่าวสารอุทยาน")
                 .description(dto.getContent() != null ? dto.getContent() : "")
                 .postDate(postDate)
-                .image(image)
+                .image(cleanImage)
                 .park(park)
                 .build();
         return announcementRepository.save(announcement);
@@ -112,7 +134,13 @@ public class AnnouncementServiceImpl implements AnnouncementService {
 
     @Override
     public void deleteAnnouncement(int id) {
-        announcementRepository.deleteById(id);
+        Announcement announcement = announcementRepository.findById(id).orElse(null);
+        if (announcement != null) {
+            if (announcement.getImage() != null) {
+                FileUtils.deleteFile(announcement.getImage(), "announcements");
+            }
+            announcementRepository.delete(announcement);
+        }
     }
 
     @Override
@@ -134,7 +162,11 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
         if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
-            announcement.setImage(dto.getImage().trim());
+            String newImage = FileUtils.extractFileName(dto.getImage(), "announcements");
+            if (announcement.getImage() != null && !announcement.getImage().equals(newImage)) {
+                FileUtils.deleteFile(announcement.getImage(), "announcements");
+            }
+            announcement.setImage(newImage);
         }
 
         return announcementRepository.save(announcement);
