@@ -43,6 +43,7 @@ public class ReplyReport {
     @Column(nullable = false)
     private String currentStatus;
 
+    @Column(columnDefinition = "TEXT")
     private String image;
 
     @ManyToOne
