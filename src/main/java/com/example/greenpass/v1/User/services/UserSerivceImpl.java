@@ -92,11 +92,4 @@ public class UserSerivceImpl implements UserService {
         return userRepository.existsByUsername(username);
     }
 
-    @Override
-    public void updateFcmToken(String username, String fcmToken) {
-        User user = getUserByUsername(username);
-        user.setFcmToken(fcmToken);
-        userRepository.save(user);
-    }
-
 }

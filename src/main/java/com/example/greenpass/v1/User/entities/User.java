@@ -37,6 +37,9 @@ public class User {
     @Column(nullable = false, length = 50)
     private String lastname;
 
+    @Column(columnDefinition = "TEXT")
+    private String profileImage;
+
     @Column(nullable = false, length = 10, unique = true)
     private String phone;
 
@@ -62,8 +65,5 @@ public class User {
 
     @Column(length = 5)
     private String zipcode;
-
-    @Column(columnDefinition = "TEXT")
-    private String fcmToken;
 
 }

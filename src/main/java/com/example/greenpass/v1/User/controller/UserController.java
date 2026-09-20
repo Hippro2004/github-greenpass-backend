@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.greenpass.dtos.ResponseObject;
 import com.example.greenpass.v1.User.dtos.LoginUserDto;
 import com.example.greenpass.v1.User.dtos.RegisterUserDto;
-import com.example.greenpass.v1.User.dtos.SessionDto;
 import com.example.greenpass.v1.User.dtos.UpdateUserDto;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
@@ -67,8 +66,7 @@ public class UserController {
             User user = userService.getUserByUsername(loginUserDto.getUsername());
             if (user != null) {
                 if (user.getPassword().equals(loginUserDto.getPassword())) {
-                    SessionDto response = new SessionDto(user.getUsername(), user.getFirstname(), user.getLastname());
-                    return new ResponseEntity<>(new ResponseObject(true, "User Login Successfully", response),
+                    return new ResponseEntity<>(new ResponseObject(true, "User Login Successfully", user),
                             HttpStatus.OK);
                 }
                 return new ResponseEntity<>(new ResponseObject(false, "Password incorrect", null),
@@ -121,28 +119,28 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{username}/fcm-token")
-    public ResponseEntity<ResponseObject> updateFcmToken(
-            @PathVariable("username") String username,
-            @RequestBody Map<String, String> payload) {
-        try {
-            User user = userService.getUserByUsername(username);
-            if (user != null) {
-                String token = payload.get("fcmToken");
-                userService.updateFcmToken(user.getUsername(), token);
-                return new ResponseEntity<>(
-                        new ResponseObject(true, "Update successfully", null),
-                        HttpStatus.OK);
-            }
+    // @PutMapping("/{username}/fcm-token")
+    // public ResponseEntity<ResponseObject> updateFcmToken(
+    // @PathVariable("username") String username,
+    // @RequestBody Map<String, String> payload) {
+    // try {
+    // User user = userService.getUserByUsername(username);
+    // if (user != null) {
+    // String token = payload.get("fcmToken");
+    // userService.updateFcmToken(user.getUsername(), token);
+    // return new ResponseEntity<>(
+    // new ResponseObject(true, "Update successfully", null),
+    // HttpStatus.OK);
+    // }
 
-            return new ResponseEntity<>(
-                    new ResponseObject(false, "User not found", null),
-                    HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(
-                    new ResponseObject(false, "Failed to update", null),
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // return new ResponseEntity<>(
+    // new ResponseObject(false, "User not found", null),
+    // HttpStatus.NOT_FOUND);
+    // } catch (Exception e) {
+    // return new ResponseEntity<>(
+    // new ResponseObject(false, "Failed to update", null),
+    // HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+    // }
 
 }

@@ -70,22 +70,24 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // เช็ค report != null ก่อนส่ง Firebase
-        if (user != null && user.getFcmToken() != null && !user.getFcmToken().isBlank() && report != null) {
-            try {
-                Message fcmMessage = Message.builder()
-                        .setToken(user.getFcmToken())
-                        .setNotification(com.google.firebase.messaging.Notification.builder()
-                                .setTitle(title)
-                                .setBody(message)
-                                .build())
-                        .putData("reportId", String.valueOf(report.getReportId()))
-                        .build();
+        // if (user != null && user.getFcmToken() != null &&
+        // !user.getFcmToken().isBlank() && report != null) {
+        // try {
+        // Message fcmMessage = Message.builder()
+        // .setToken(user.getFcmToken())
+        // .setNotification(com.google.firebase.messaging.Notification.builder()
+        // .setTitle(title)
+        // .setBody(message)
+        // .build())
+        // .putData("reportId", String.valueOf(report.getReportId()))
+        // .build();
 
-                FirebaseMessaging.getInstance().send(fcmMessage);
-            } catch (Exception e) {
-                System.err.println("Failed to send Firebase notification: " + e.getMessage());
-            }
-        }
+        // FirebaseMessaging.getInstance().send(fcmMessage);
+        // } catch (Exception e) {
+        // System.err.println("Failed to send Firebase notification: " +
+        // e.getMessage());
+        // }
+        // }
     }
 
     @Override

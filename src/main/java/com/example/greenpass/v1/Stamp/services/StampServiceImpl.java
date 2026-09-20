@@ -42,6 +42,7 @@ public class StampServiceImpl implements StampService {
                         .stampId(stamp.getStampId())
                         .stampDate(stamp.getStampDate())
                         .time(stamp.getTime())
+                        .parkId(stamp.getPark().getParkId())
                         .parkName(stamp.getPark().getName())
                         .parkRangerName(
                                 stamp.getParkRanger().getFirstname() + " " + stamp.getParkRanger().getSurname())

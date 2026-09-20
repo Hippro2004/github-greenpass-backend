@@ -5,6 +5,7 @@ import com.example.greenpass.v1.User.dtos.UpdateUserDto;
 import com.example.greenpass.v1.User.entities.User;
 
 public interface UserService {
+
     void registerUser(RegisterUserDto registerUserDto);
 
     User getUserByUsername(String username);
@@ -16,7 +17,5 @@ public interface UserService {
     boolean existsByUsername(String username);
 
     void updateUser(String username, UpdateUserDto updateUserDto);
-
-    void updateFcmToken(String username, String fcmToken);
 
 }

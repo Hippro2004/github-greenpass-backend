@@ -42,7 +42,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     @Override
     public AnnouncementResponse getAnnouncementById(int id) {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
-        if (announcement == null) return null;
+        if (announcement == null)
+            return null;
         return new AnnouncementResponse(
                 announcement.getAnnouncementId(),
                 announcement.getAnnouncementTitle(),
@@ -65,14 +66,16 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         if (park == null) {
             try {
                 park = parkService.getParkById(1);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         LocalDate postDate = LocalDate.now();
         if (dto.getPublishDate() != null && !dto.getPublishDate().trim().isEmpty()) {
             try {
                 postDate = LocalDate.parse(dto.getPublishDate().trim());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         String image = "src/news1.jpg";
@@ -106,7 +109,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         if (dto.getPublishDate() != null && !dto.getPublishDate().trim().isEmpty()) {
             try {
                 postDate = LocalDate.parse(dto.getPublishDate().trim());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         announcement.setAnnouncementTitle(dto.getTitle());
