@@ -50,7 +50,7 @@ public class ParkRanger {
     @Column(nullable = false, length = 1)
     private Integer gender;
 
-    @Column(columnDefinition = "LONGTEXT", nullable = true)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String signature;
 
     @Column(nullable = false, length = 20)
