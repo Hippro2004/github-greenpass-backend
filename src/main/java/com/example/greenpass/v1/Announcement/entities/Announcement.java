@@ -36,7 +36,7 @@ public class Announcement {
     @Column(nullable = false)
     private LocalDate postDate;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(columnDefinition = "TEXT", nullable = false)
