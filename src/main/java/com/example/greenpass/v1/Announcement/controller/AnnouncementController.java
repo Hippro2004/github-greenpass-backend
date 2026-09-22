@@ -77,9 +77,10 @@ public class AnnouncementController {
     public ResponseEntity<ResponseObject> addAnnouncement(@RequestBody @Valid AddAnnouncementDto dto) {
         try {
             Announcement announcement = announcementService.addAnnouncement(dto);
+            AnnouncementResponse resDto = announcementService.getAnnouncementById(announcement.getAnnouncementId());
 
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Announcement created successfully", announcement),
+                    new ResponseObject(true, "Announcement created successfully", resDto != null ? resDto : announcement),
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -148,8 +149,9 @@ public class AnnouncementController {
                         HttpStatus.NOT_FOUND);
             }
 
+            AnnouncementResponse resDto = announcementService.getAnnouncementById(targetId);
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Announcement updated successfully", announcement),
+                    new ResponseObject(true, "Announcement updated successfully", resDto != null ? resDto : announcement),
                     HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

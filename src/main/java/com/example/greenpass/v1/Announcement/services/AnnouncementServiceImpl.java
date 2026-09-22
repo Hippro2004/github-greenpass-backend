@@ -34,8 +34,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         }
 
         String cleanName = FileUtils.extractFileName(img, "announcements");
-        if (cleanName == null || cleanName.equalsIgnoreCase("news1.jpg") || cleanName.equalsIgnoreCase("src/news1.jpg")) {
-            return "/src/news1.jpg";
+        if (cleanName == null || cleanName.equalsIgnoreCase("news1.jpg") || cleanName.equalsIgnoreCase("src/news1.jpg") || cleanName.equalsIgnoreCase("default.jpg")) {
+            return null;
         }
 
         return "/uploads/announcements/" + cleanName;
@@ -161,12 +161,14 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setAnnouncementTitle(dto.getTitle());
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
-        if (dto.getImage() != null && !dto.getImage().trim().isEmpty()) {
+        if (dto.getImage() != null && !dto.getImage().trim().isEmpty() && !dto.getImage().equalsIgnoreCase("null") && !dto.getImage().equals("-")) {
             String newImage = FileUtils.extractFileName(dto.getImage(), "announcements");
-            if (announcement.getImage() != null && !announcement.getImage().equals(newImage)) {
-                FileUtils.deleteFile(announcement.getImage(), "announcements");
+            if (newImage != null && !newImage.trim().isEmpty() && !newImage.equalsIgnoreCase("news1.jpg")) {
+                if (announcement.getImage() != null && !announcement.getImage().equals(newImage)) {
+                    FileUtils.deleteFile(announcement.getImage(), "announcements");
+                }
+                announcement.setImage(newImage);
             }
-            announcement.setImage(newImage);
         }
 
         return announcementRepository.save(announcement);
