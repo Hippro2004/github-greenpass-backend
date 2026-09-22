@@ -21,5 +21,6 @@ public class ParkRangerResponseDto {
     private int parkId;
     private String parkName;
     private Park park;
+    private String signature;
 
 }

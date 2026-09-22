@@ -49,6 +49,7 @@ public class ParkRangerController {
                             .mobilephone(ranger.getMobilephone())
                             .position(ranger.getPosition())
                             .parkId(ranger.getPark().getParkId())
+                            .signature(ranger.getSignature())
                             .build();
 
                     return new ResponseEntity<>(

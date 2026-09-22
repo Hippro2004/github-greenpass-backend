@@ -35,4 +35,6 @@ public class AddParkRangerDto {
     private Boolean canProgressReport;
     private Boolean canEditParkDetails;
 
+    private String signature;
+
 }

@@ -10,6 +10,7 @@ import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.dtos.AddParkRangerDto;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
+import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,6 +67,16 @@ public class ParkRangerServiceImpl implements ParkRangerService {
             } catch (Exception e) {}
         }
 
+        String signature = "src/sig1.png";
+        if (dto.getSignature() != null && !dto.getSignature().trim().isEmpty()) {
+            String extracted = FileUtils.extractFileName(dto.getSignature(), "signatures");
+            if (extracted != null && !extracted.trim().isEmpty()) {
+                signature = extracted;
+            } else {
+                signature = dto.getSignature().trim();
+            }
+        }
+
         ParkRanger ranger = ParkRanger.builder()
                 .username(username)
                 .password(password)
@@ -75,7 +86,7 @@ public class ParkRangerServiceImpl implements ParkRangerService {
                 .email(email)
                 .birthDate(parsedBirthDate)
                 .gender(dto.getGender() > 0 ? dto.getGender() : 1)
-                .signature("src/sig1.png")
+                .signature(signature)
                 .district(district)
                 .subDistrict(subDistrict)
                 .province(province)
@@ -139,6 +150,15 @@ public class ParkRangerServiceImpl implements ParkRangerService {
         if (dto.getCanIssueStamp() != null) parkRanger.setCanIssueStamp(dto.getCanIssueStamp());
         if (dto.getCanProgressReport() != null) parkRanger.setCanProgressReport(dto.getCanProgressReport());
         if (dto.getCanEditParkDetails() != null) parkRanger.setCanEditParkDetails(dto.getCanEditParkDetails());
+
+        if (dto.getSignature() != null && !dto.getSignature().trim().isEmpty()) {
+            String extracted = FileUtils.extractFileName(dto.getSignature(), "signatures");
+            if (extracted != null && !extracted.trim().isEmpty()) {
+                parkRanger.setSignature(extracted);
+            } else {
+                parkRanger.setSignature(dto.getSignature().trim());
+            }
+        }
 
         return parkRangerRepository.save(parkRanger);
     }

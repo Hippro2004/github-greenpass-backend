@@ -48,6 +48,7 @@ public class FileUploadController {
         if (!cleanCategory.equals("rewards") &&
                 !cleanCategory.equals("announcements") &&
                 !cleanCategory.equals("reports") &&
+                !cleanCategory.equals("signatures") &&
                 !cleanCategory.equals("users")) {
             cleanCategory = "general";
         }
