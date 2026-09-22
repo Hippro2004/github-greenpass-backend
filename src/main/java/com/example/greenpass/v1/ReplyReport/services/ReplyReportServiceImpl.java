@@ -37,13 +37,20 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     @Override
     public List<ReplyReportResponse> getReplyReportByReportId(int reportId) {
         return replyReporyRepository.findAllByReportReportId(reportId).stream().map(e -> {
+            String rangerFullName = null;
+            String rangerUsername = null;
+            if (e.getParkRanger() != null) {
+                rangerFullName = (e.getParkRanger().getFirstname() + " " + e.getParkRanger().getSurname()).trim();
+                rangerUsername = e.getParkRanger().getUsername();
+            }
             return ReplyReportResponse.builder()
                     .updateDate(e.getUpdateDate())
                     .updateTime(e.getUpdateTime())
                     .progress(e.getProgress())
                     .currentStatus(e.getCurrentStatus())
                     .image(FileUtils.extractFileName(e.getImage(), "reports"))
-                    .parkRangerName(e.getParkRanger() != null ? e.getParkRanger().getFirstname() : null)
+                    .parkRangerName(rangerFullName)
+                    .parkRangerUsername(rangerUsername)
                     .build();
         }).toList();
     }

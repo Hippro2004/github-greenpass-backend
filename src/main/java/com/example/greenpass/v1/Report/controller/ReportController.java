@@ -105,11 +105,18 @@ public class ReportController {
     @PutMapping("/{id}/status")
     public ResponseEntity<ResponseObject> updateReportStatus(@PathVariable int id,
             @RequestBody Map<String, String> payload,
-            @RequestHeader(value = "username", required = false) String username) {
+            @RequestHeader(value = "username", required = false) String usernameHeader) {
         try {
             String status = payload.get("status");
             String progress = payload.get("progress");
             String image = payload.get("image");
+            String username = usernameHeader;
+            if ((username == null || username.isBlank()) && payload.containsKey("username")) {
+                username = payload.get("username");
+            }
+            if ((username == null || username.isBlank()) && payload.containsKey("rangerUsername")) {
+                username = payload.get("rangerUsername");
+            }
             ReportResponse updated = reportService.updateReportStatus(id, status, progress, image, username);
             if (updated == null) {
                 return new ResponseEntity<>(new ResponseObject(false, "Report not found for update", null),
@@ -117,8 +124,11 @@ public class ReportController {
             }
             return new ResponseEntity<>(new ResponseObject(true, "Status updated successfully", updated),
                     HttpStatus.OK);
+        } catch (IllegalStateException e) {
+            return new ResponseEntity<>(new ResponseObject(false, e.getMessage(), null),
+                    HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ResponseObject(false, "Failed to update report status", null),
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to update report status: " + e.getMessage(), null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -4,8 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import com.example.greenpass.v1.Park.entities.Park;
+import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.User.entities.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,4 +65,9 @@ public class Report {
     @ManyToOne
     @JoinColumn(name = "typeId", nullable = false)
     private ReportType type;
+
+    @ManyToOne
+    @JoinColumn(name = "parkRangerId")
+    @JsonIgnoreProperties({"password", "park"})
+    private ParkRanger parkRanger;
 }

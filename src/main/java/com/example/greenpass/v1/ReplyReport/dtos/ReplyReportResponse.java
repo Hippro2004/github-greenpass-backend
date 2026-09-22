@@ -19,5 +19,5 @@ public class ReplyReportResponse {
     private String currentStatus;
     private String image;
     private String parkRangerName;
-
+    private String parkRangerUsername;
 }
