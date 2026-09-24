@@ -8,4 +8,8 @@ import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
 
 public interface ReplyReporyRepository extends JpaRepository<ReplyReport, Long> {
     List<ReplyReport> findAllByReportReportId(int reportId);
+
+    List<ReplyReport> findAllByReportParkParkIdOrderByReplyReportIdDesc(int parkId);
+
+    List<ReplyReport> findAllByReportUserUsernameOrderByReplyReportIdDesc(String username);
 }

@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
-import com.example.greenpass.v1.Notification.entities.Notification;
-import com.example.greenpass.v1.Notification.services.NotificationService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.v1.Stamp.dtos.ScanQrDto;
@@ -34,7 +33,7 @@ public class ScanCheckinQRcodeController {
     private final StampService stampService;
     private final ParkRangerService parkRangerService;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping(value = { "", "/scan", "/scan-checkin" })
     public ResponseEntity<ResponseObject> scanQr(@RequestBody ScanQrDto scanQrDto) {
@@ -107,11 +106,12 @@ public class ScanCheckinQRcodeController {
 
                 // 👉 ส่งแจ้งเตือนบอก Mobile ด้วยว่าเคยสแกนไปแล้ว
                 try {
-                    notificationService.sendUserNotification(
-                            user,
-                            "แจ้งเตือนการสแกน",
-                            "คุณได้รับสแตมป์ของ " + parkTitle + " ไปแล้ว ไม่สามารถรับซ้ำได้ภายใน 2 ชั่วโมง",
-                            null);
+                    java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                    payload.put("title", "แจ้งเตือนการสแกน");
+                    payload.put("message", "คุณได้รับสแตมป์ของ " + parkTitle + " ไปแล้ว ไม่สามารถรับซ้ำได้ภายใน 2 ชั่วโมง");
+                    payload.put("type", "STAMP_DUPLICATE");
+                    messagingTemplate.convertAndSend("/topic/user/" + username + "/reply-reports", (Object) payload);
+                    messagingTemplate.convertAndSend("/topic/user/" + username.toLowerCase() + "/reply-reports", (Object) payload);
                 } catch (Exception ignored) {
                 }
                 return new ResponseEntity<>(
@@ -129,11 +129,12 @@ public class ScanCheckinQRcodeController {
                     ? ranger.getPark().getName()
                     : "อุทยานแห่งชาติ";
             try {
-                notificationService.sendUserNotification(
-                        user,
-                        "สแกนสำเร็จ",
-                        "คุณได้รับแสตมป์ของ " + parkTitle + " เรียบร้อยแล้ว",
-                        null);
+                java.util.Map<String, Object> payload = new java.util.HashMap<>();
+                payload.put("title", "สแกนสำเร็จ");
+                payload.put("message", "คุณได้รับแสตมป์ของ " + parkTitle + " เรียบร้อยแล้ว");
+                payload.put("type", "STAMP_SUCCESS");
+                messagingTemplate.convertAndSend("/topic/user/" + username + "/reply-reports", (Object) payload);
+                messagingTemplate.convertAndSend("/topic/user/" + username.toLowerCase() + "/reply-reports", (Object) payload);
             } catch (Exception ex) {
                 System.err.println("Failed to send scan notification: " + ex.getMessage());
             }

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.greenpass.v1.Notification.services.NotificationService;
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
@@ -39,7 +38,7 @@ public class ReportServiceImpl implements ReportService {
     private final ParkRangerRepository parkRangerRepository;
     private final ReporyTypeService reportTypeService;
     private final ReportTypeRepository reportTypeRepository;
-    private final NotificationService notificationService;
+
 
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "ยังไม่มีผู้รับผิดชอบ";
@@ -96,14 +95,15 @@ public class ReportServiceImpl implements ReportService {
     public void addReport(AddReportDto addReportDto, String username) {
         User user = userService.getUserByUsername(username);
         Park park = parkService.getParkById(addReportDto.getParkId());
-        
+
         String inputTypeName = addReportDto.getTypeName();
         ReportType type = null;
         if (inputTypeName != null && !inputTypeName.isBlank()) {
             String trimmed = inputTypeName.trim();
             type = reportTypeService.getTypeByName(trimmed);
             if (type == null) {
-                if ("2".equals(trimmed) || trimmed.contains("ร้ายแรง") || trimmed.contains("ฉุกเฉิน") || trimmed.equalsIgnoreCase("severe") || trimmed.equalsIgnoreCase("emergency")) {
+                if ("2".equals(trimmed) || trimmed.contains("ร้ายแรง") || trimmed.contains("ฉุกเฉิน")
+                        || trimmed.equalsIgnoreCase("severe") || trimmed.equalsIgnoreCase("emergency")) {
                     type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
                 } else if ("1".equals(trimmed) || trimmed.contains("ปกติ") || trimmed.equalsIgnoreCase("normal")) {
                     type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
@@ -112,8 +112,11 @@ public class ReportServiceImpl implements ReportService {
         }
 
         if (type == null) {
-            String combinedText = ((addReportDto.getName() != null ? addReportDto.getName() : "") + " " + (addReportDto.getDescription() != null ? addReportDto.getDescription() : "")).toLowerCase();
-            if (combinedText.contains("ร้ายแรง") || combinedText.contains("ฉุกเฉิน") || combinedText.contains("emergency") || combinedText.contains("danger") || combinedText.contains("help")) {
+            String combinedText = ((addReportDto.getName() != null ? addReportDto.getName() : "") + " "
+                    + (addReportDto.getDescription() != null ? addReportDto.getDescription() : "")).toLowerCase();
+            if (combinedText.contains("ร้ายแรง") || combinedText.contains("ฉุกเฉิน")
+                    || combinedText.contains("emergency") || combinedText.contains("danger")
+                    || combinedText.contains("help")) {
                 type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
             } else {
                 type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
@@ -145,21 +148,6 @@ public class ReportServiceImpl implements ReportService {
                     .parkRanger(null)
                     .build();
             replyReportService.addReplyReport(replyReport, saved);
-
-            String typeNameStr = (type != null && type.getTypeName() != null) 
-                    ? type.getTypeName() 
-                    : "ปกติ";
-
-            boolean isSevere = (type != null && type.getTypeId() != null && type.getTypeId() == 2) 
-                    || "ร้ายแรง".equals(typeNameStr);
-
-            String titlePrefix = isSevere ? "🚨 แจ้งเตือนเหตุฉุกเฉินด่วน (ร้ายแรง)" : "มีรายงานปัญหาใหม่ (ปกติ)";
-
-            notificationService.sendParkNotification(park,
-                    titlePrefix,
-                    addReport.getName() + ": " + addReport.getDescription(),
-                    saved);
-
         }
 
     }
@@ -212,7 +200,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ReportResponse updateReportStatus(int reportId, String status, String progress, String image, String rangerUsername) {
+    public ReportResponse updateReportStatus(int reportId, String status, String progress, String image,
+            String rangerUsername) {
         Report report = reportRepository.findByReportId(reportId).orElse(null);
         if (report == null) {
             return null;
@@ -236,12 +225,16 @@ public class ReportServiceImpl implements ReportService {
         }
 
         // 🔒 ตรวจสอบสิทธิ์ผู้รับผิดชอบ:
-        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว เจ้าหน้าที่คนอื่นไม่สามารถเข้ามาแก้ไขหรือดำเนินการแทนได้
+        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว
+        // เจ้าหน้าที่คนอื่นไม่สามารถเข้ามาแก้ไขหรือดำเนินการแทนได้
         if (report.getParkRanger() != null) {
             String assignedUsername = report.getParkRanger().getUsername();
-            if (rangerUsername != null && !rangerUsername.isBlank() && !assignedUsername.equalsIgnoreCase(rangerUsername.trim())) {
-                String assignedFullName = (report.getParkRanger().getFirstname() + " " + report.getParkRanger().getSurname()).trim();
-                throw new IllegalStateException("รายงานนี้อยู่ภายใต้ความรับผิดชอบของเจ้าหน้าที่ " + assignedFullName + " แล้ว เจ้าหน้าที่ท่านอื่นไม่สามารถดำเนินการแทนได้");
+            if (rangerUsername != null && !rangerUsername.isBlank()
+                    && !assignedUsername.equalsIgnoreCase(rangerUsername.trim())) {
+                String assignedFullName = (report.getParkRanger().getFirstname() + " "
+                        + report.getParkRanger().getSurname()).trim();
+                throw new IllegalStateException("รายงานนี้อยู่ภายใต้ความรับผิดชอบของเจ้าหน้าที่ " + assignedFullName
+                        + " แล้ว เจ้าหน้าที่ท่านอื่นไม่สามารถดำเนินการแทนได้");
             }
         } else {
             // หากยังไม่มีผู้รับผิดชอบ ให้บันทึกเจ้าหน้าที่ผู้นี้เป็นผู้รับผิดชอบรายงานทันที
@@ -268,17 +261,6 @@ public class ReportServiceImpl implements ReportService {
                 .parkRanger(currentRanger != null ? currentRanger : report.getParkRanger())
                 .build();
         replyReportService.addReplyReport(replyReport, report);
-
-        String thaiStatus = "Pending".equals(status) ? "แจ้งรายงาน" : "InProgress".equals(status) ? "กำลังดำเนินการ" : "Completed".equals(status) ? "ดำเนินการแก้ไขสำเร็จ" : status;
-
-        User reportOwner = report.getUser();
-        if (reportOwner != null) {
-            notificationService.sendUserNotification(
-                    reportOwner,
-                    "อัปเดตสถานะรายงาน (" + thaiStatus + ")",
-                    "รายงาน '" + report.getName() + "' ของคุณได้รับการเปลี่ยนสถานะเป็น " + thaiStatus,
-                    report);
-        }
 
         return mapToResponse(report);
     }

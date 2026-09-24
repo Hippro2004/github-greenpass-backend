@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ReplyReportResponse {
+    private Long replyReportId;
+    private Integer reportId;
     private LocalDate updateDate;
     private LocalTime updateTime;
     private String progress;
