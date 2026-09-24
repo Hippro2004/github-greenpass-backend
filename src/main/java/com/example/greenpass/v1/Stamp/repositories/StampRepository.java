@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.example.greenpass.v1.Stamp.entities.Stamp;
 
@@ -24,4 +25,9 @@ public interface StampRepository extends JpaRepository<Stamp, Integer> {
             + "from Stamp s group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
             + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
     List<Object[]> findVisitStatistics();
+
+    @Query("select function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner, count(s) "
+            + "from Stamp s where s.park.parkId = :parkId group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
+            + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
+    List<Object[]> findVisitStatisticsByParkId(@Param("parkId") int parkId);
 }

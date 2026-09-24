@@ -37,7 +37,7 @@ public class Park {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String image;
 
     @Column(nullable = false)

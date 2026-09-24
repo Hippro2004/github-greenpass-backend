@@ -28,12 +28,16 @@ public class ParkDataSeeder implements CommandLineRunner {
             for (int i = 0; i < allParksData.size(); i++) {
                 int targetId = i + 1;
                 ParkData pd = allParksData.get(i);
-                jdbcTemplate.update("UPDATE park SET name = ?, description = ?, event_note = ? WHERE park_id = ?",
+                jdbcTemplate.update("UPDATE park SET name = ?, event_note = ? WHERE park_id = ?",
                         pd.name,
-                        pd.description,
                         pd.eventNote,
                         targetId);
+                jdbcTemplate.update("UPDATE park SET description = ? WHERE park_id = ? AND (description IS NULL OR CHAR_LENGTH(description) < 200)",
+                        pd.description,
+                        targetId);
             }
+            jdbcTemplate.execute("UPDATE park SET season_open_date = '2026-01-01' WHERE season_open_date IS NULL");
+            jdbcTemplate.execute("UPDATE park SET season_close_date = '2026-12-31' WHERE season_close_date IS NULL");
             jdbcTemplate.execute("ALTER TABLE park AUTO_INCREMENT = 157");
         } catch (Exception e) {
             System.err.println("Error updating park data: " + e.getMessage());
@@ -85,7 +89,7 @@ public class ParkDataSeeder implements CommandLineRunner {
         list.add(new ParkData("อุทยานแห่งชาติดอยสุเทพ-ปุย",
                 "ถนนศรีวิชัย ตำบลสุเทพ อำเภอเมืองเชียงใหม่ จังหวัดเชียงใหม่ 50200", "18.8070052, 98.9160906",
                 "https://images.unsplash.com/photo-1544735716-392fe2489ffa",
-                "อุทยานแห่งชาติดอยสุเทพ-ปุย อัญมณีแห่งธรรมชาติและวัฒนธรรมคู่เมืองเชียงใหม่ มีเนื้อที่ครอบคลุมวัดพระธาตุดอยสุเทพ พระตำหนักภูพิงคราชนิเวศน์ และยอดดอยปุย",
+                "อุทยานแห่งชาติดอยสุเทพ-ปุย ตั้งอยู่ในท้องที่อำเภอเมือง อำเภอแม่ริม และอำเภอหางดง จังหวัดเชียงใหม่ ครอบคลุมพื้นที่ป่าอนุรักษ์ประมาณ 261 ตารางกิโลเมตร เป็นแหล่งรวมความอุดมสมบูรณ์ทางธรรมชาติและมรดกทางประวัติศาสตร์วัฒนธรรมอันล้ำค่าคู่เมืองเชียงใหม่ มียอดดอยปุยเป็นจุดสูงสุดที่ระดับความสูง 1,685 เมตรจากระดับน้ำทะเล สภาพป่าไม้มีความหลากหลายทั้งป่าเต็งรัง ป่าเบญจพรรณ และป่าดิบเขาเขียวชอุ่มตลอดทั้งปี เป็นถิ่นอาศัยของนกนานาชนิดกว่า 360 สายพันธุ์ สัตว์ป่าหายาก และพืชพรรณเมืองหนาวหลากสายพันธุ์\\n\\nภายในพื้นที่อุทยานเป็นที่ตั้งของสถานที่สำคัญทางประวัติศาสตร์และปูชนียสถานศักดิ์สิทธิ์ ได้แก่ วัดพระธาตุดอยสุเทพราชวรวิหาร พระตำหนักภูพิงคราชนิเวศน์ ยอดดอยปุย และหมู่บ้านชาวไทยภูเขาเผ่าม้ง นอกจากนี้ยังมีแหล่งท่องเที่ยวทางธรรมชาติที่มีชื่อเสียงระดับประเทศ เช่น น้ำตกห้วยแก้ว น้ำตกมณฑาธาร น้ำตกแม่สา และจุดชมทัศนียภาพเมืองเชียงใหม่ ทั้งยังมีเส้นทางศึกษาธรรมชาติหลากหลายเส้นทางที่เหมาะสำหรับนักท่องเที่ยวสายเดินป่าและการท่องเที่ยวเชิงนิเวศอย่างแท้จริง",
                 "ด่านตรวจห้วยแก้ว (กม. 1) & ด่านตรวจดอยปุย (กม.22)"));
         list.add(new ParkData("อุทยานแห่งชาติดอยอินทนนท์", "119 หมู่ 7 ตำบลบ้านหลวง อำเภอจอมทอง จังหวัดเชียงใหม่ 50160",
                 "18.5356313, 98.519549", "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",

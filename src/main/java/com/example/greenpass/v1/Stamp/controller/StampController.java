@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/stamp")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class StampController {
 
     private final QRService qrService;
@@ -103,9 +105,13 @@ public class StampController {
     }
 
     @GetMapping("/statistics")
-    public ResponseEntity<ResponseObject> getStatistics() {
+    public ResponseEntity<ResponseObject> getStatistics(
+            @RequestParam(value = "parkId", required = false) Integer parkId,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestHeader(value = "username", required = false) String usernameHeader) {
         try {
-            VisitStatisticsResponse stats = stampService.getVisitStatistics();
+            String targetUsername = (username != null && !username.isBlank()) ? username : usernameHeader;
+            VisitStatisticsResponse stats = stampService.getVisitStatistics(parkId, targetUsername);
             return new ResponseEntity<>(
                     new ResponseObject(true, "Fetch visit statistics successfully", stats),
                     HttpStatus.OK);

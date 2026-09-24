@@ -104,18 +104,21 @@ public class ReportController {
 
     @PutMapping("/{id}/status")
     public ResponseEntity<ResponseObject> updateReportStatus(@PathVariable int id,
-            @RequestBody Map<String, String> payload,
+            @RequestBody Map<String, Object> payload,
             @RequestHeader(value = "username", required = false) String usernameHeader) {
         try {
-            String status = payload.get("status");
-            String progress = payload.get("progress");
-            String image = payload.get("image");
-            String username = usernameHeader;
-            if ((username == null || username.isBlank()) && payload.containsKey("username")) {
-                username = payload.get("username");
+            String status = payload.get("status") != null ? payload.get("status").toString() : null;
+            if (status == null && payload.containsKey("currentStatus") && payload.get("currentStatus") != null) {
+                status = payload.get("currentStatus").toString();
             }
-            if ((username == null || username.isBlank()) && payload.containsKey("rangerUsername")) {
-                username = payload.get("rangerUsername");
+            String progress = payload.get("progress") != null ? payload.get("progress").toString() : null;
+            String image = payload.get("image") != null ? payload.get("image").toString() : null;
+            String username = usernameHeader;
+            if ((username == null || username.isBlank()) && payload.containsKey("username") && payload.get("username") != null) {
+                username = payload.get("username").toString();
+            }
+            if ((username == null || username.isBlank()) && payload.containsKey("rangerUsername") && payload.get("rangerUsername") != null) {
+                username = payload.get("rangerUsername").toString();
             }
             ReportResponse updated = reportService.updateReportStatus(id, status, progress, image, username);
             if (updated == null) {

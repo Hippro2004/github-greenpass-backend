@@ -13,6 +13,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.example.greenpass.v1.Park.entities.Park;
+import com.example.greenpass.v1.Park.repositories.ParkRepository;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class StampServiceImpl implements StampService {
     private final UserService userService;
     private final ParkRangerService parkRangerService;
+    private final ParkRepository parkRepository;
     private final StampRepository stampRepository;
 
     @Override
@@ -113,49 +115,93 @@ public class StampServiceImpl implements StampService {
 
     @Override
     public VisitStatisticsResponse getVisitStatistics() {
+        return getVisitStatistics(null, null);
+    }
+
+    @Override
+    public VisitStatisticsResponse getVisitStatistics(Integer parkId, String username) {
+        if (parkId == null && username != null && !username.isBlank()) {
+            ParkRanger ranger = parkRangerService.getParkRangerByUsername(username.trim());
+            if (ranger != null && ranger.getPark() != null) {
+                parkId = ranger.getPark().getParkId();
+            }
+        }
+
         int currentYear = LocalDate.now().getYear();
-        Map<Integer, long[]> monthly = new LinkedHashMap<>();
+        int startYear = 2023;
+        int endYear = Math.max(currentYear, 2026);
+
+        Map<Integer, Map<Integer, long[]>> yearMonthCounts = new LinkedHashMap<>();
         Map<Integer, long[]> yearly = new LinkedHashMap<>();
 
-        for (Object[] row : stampRepository.findVisitStatistics()) {
+        for (int y = startYear; y <= endYear; y++) {
+            yearMonthCounts.put(y, new LinkedHashMap<>());
+            yearly.put(y, new long[2]);
+        }
+
+        List<Object[]> rows = (parkId != null)
+                ? stampRepository.findVisitStatisticsByParkId(parkId)
+                : stampRepository.findVisitStatistics();
+
+        for (Object[] row : rows) {
             int year = ((Number) row[0]).intValue();
             int month = ((Number) row[1]).intValue();
             boolean foreigner = (Boolean) row[2];
             long count = ((Number) row[3]).longValue();
 
             yearly.computeIfAbsent(year, ignored -> new long[2])[foreigner ? 1 : 0] += count;
-            if (year == currentYear) {
-                monthly.computeIfAbsent(month, ignored -> new long[2])[foreigner ? 1 : 0] += count;
+            yearMonthCounts.computeIfAbsent(year, ignored -> new LinkedHashMap<>())
+                    .computeIfAbsent(month, ignored -> new long[2])[foreigner ? 1 : 0] += count;
+        }
+
+        Map<String, PeriodStatistics> monthlyStatsByYear = new LinkedHashMap<>();
+        for (int y = startYear; y <= endYear; y++) {
+            Map<Integer, long[]> months = yearMonthCounts.getOrDefault(y, java.util.Collections.emptyMap());
+            List<HistoryItem> history = new ArrayList<>(12);
+            for (int m = 1; m <= 12; m++) {
+                long[] val = months.getOrDefault(m, new long[2]);
+                history.add(HistoryItem.builder()
+                        .label(monthLabel(m))
+                        .thai(val[0])
+                        .foreigner(val[1])
+                        .build());
+            }
+            monthlyStatsByYear.put("ปี " + y, periodStatistics(history));
+        }
+
+        List<HistoryItem> yearlyHistory = new ArrayList<>();
+        for (int y = startYear; y <= endYear; y++) {
+            long[] val = yearly.getOrDefault(y, new long[2]);
+            yearlyHistory.add(HistoryItem.builder()
+                    .label("ปี " + y)
+                    .thai(val[0])
+                    .foreigner(val[1])
+                    .build());
+        }
+        PeriodStatistics yearlyStats = periodStatistics(yearlyHistory);
+
+        PeriodStatistics currentMonthlyStats = monthlyStatsByYear.getOrDefault("ปี " + currentYear, periodStatistics(new ArrayList<>()));
+
+        long totalThai = yearly.values().stream().mapToLong(v -> v[0]).sum();
+        long totalForeigner = yearly.values().stream().mapToLong(v -> v[1]).sum();
+
+        String parkName = null;
+        if (parkId != null) {
+            Park park = parkRepository.findById(parkId).orElse(null);
+            if (park != null) {
+                parkName = park.getName();
             }
         }
 
-        long thai = yearly.values().stream().mapToLong(values -> values[0]).sum();
-        long foreigner = yearly.values().stream().mapToLong(values -> values[1]).sum();
-
-        List<HistoryItem> monthlyHistory = new ArrayList<>();
-        for (int month = 1; month <= 12; month++) {
-            long[] values = monthly.getOrDefault(month, new long[2]);
-            monthlyHistory.add(HistoryItem.builder()
-                    .label(monthLabel(month))
-                    .thai(values[0])
-                    .foreigner(values[1])
-                    .build());
-        }
-
-        List<HistoryItem> yearlyHistory = yearly.entrySet().stream()
-                .map(entry -> HistoryItem.builder()
-                        .label("ปี " + entry.getKey())
-                        .thai(entry.getValue()[0])
-                        .foreigner(entry.getValue()[1])
-                        .build())
-                .toList();
-
         return VisitStatisticsResponse.builder()
-                .thai(thai)
-                .foreigner(foreigner)
-                .total(thai + foreigner)
-                .monthlyStats(periodStatistics(monthlyHistory))
-                .yearlyStats(periodStatistics(yearlyHistory))
+                .thai(totalThai)
+                .foreigner(totalForeigner)
+                .total(totalThai + totalForeigner)
+                .monthlyStats(currentMonthlyStats)
+                .yearlyStats(yearlyStats)
+                .monthlyStatsByYear(monthlyStatsByYear)
+                .parkId(parkId)
+                .parkName(parkName)
                 .build();
     }
 

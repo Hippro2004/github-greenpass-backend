@@ -148,6 +148,22 @@ public class ParkController {
                                         existing.setCloseTime(java.time.LocalTime.parse(ct));
                                 } catch (Exception ignored) {}
                         }
+                        if (body.get("isSeasonalPark") != null) {
+                                existing.setSeasonalPark(Boolean.parseBoolean(body.get("isSeasonalPark").toString()));
+                        }
+                        if (body.get("isTemporaryClosed") != null) {
+                                existing.setTemporaryClosed(Boolean.parseBoolean(body.get("isTemporaryClosed").toString()));
+                        }
+                        if (body.get("seasonOpenDate") != null && !body.get("seasonOpenDate").toString().trim().isEmpty()) {
+                                try {
+                                        existing.setSeasonOpenDate(java.time.LocalDate.parse(body.get("seasonOpenDate").toString().trim()));
+                                } catch (Exception ignored) {}
+                        }
+                        if (body.get("seasonCloseDate") != null && !body.get("seasonCloseDate").toString().trim().isEmpty()) {
+                                try {
+                                        existing.setSeasonCloseDate(java.time.LocalDate.parse(body.get("seasonCloseDate").toString().trim()));
+                                } catch (Exception ignored) {}
+                        }
 
                         Park saved = parkService.saveOrUpdatePark(existing);
                         return new ResponseEntity<>(

@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.Stamp.dtos;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,9 @@ public class VisitStatisticsResponse {
     private long total;
     private PeriodStatistics monthlyStats;
     private PeriodStatistics yearlyStats;
+    private Map<String, PeriodStatistics> monthlyStatsByYear;
+    private Integer parkId;
+    private String parkName;
 
     @Getter
     @Builder
