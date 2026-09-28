@@ -41,7 +41,7 @@ public class ScanCheckinQRcodeController {
             String token = scanQrDto.getToken();
             if (token == null || token.trim().isEmpty()) {
                 return new ResponseEntity<>(
-                        new ResponseObject(false, "ไม่พบข้อมูล Token ของ QR Code", null),
+                        new ResponseObject(false, "ไม่พบข้อมูลสมาชิก", null),
                         HttpStatus.BAD_REQUEST);
             }
 
@@ -61,7 +61,7 @@ public class ScanCheckinQRcodeController {
 
             if (user == null) {
                 return new ResponseEntity<>(
-                        new ResponseObject(false, "ไม่พบข้อมูลนักท่องเที่ยวในฐานข้อมูล ไม่สามารถมอบสแตมป์ได้", null),
+                        new ResponseObject(false, "ไม่พบข้อมูลสมาชิก", null),
                         HttpStatus.NOT_FOUND);
             }
 
@@ -122,7 +122,14 @@ public class ScanCheckinQRcodeController {
             }
 
             // 5. Save stamp to database
-            stampService.stampUser(username, parkRangerUsername);
+            try {
+                stampService.stampUser(username, parkRangerUsername);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "ไม่สามารถบันทึกตราประทับได้", null),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
             String parkTitle = (ranger != null && ranger.getPark() != null)
                     ? ranger.getPark().getName()
@@ -161,7 +168,7 @@ public class ScanCheckinQRcodeController {
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(
-                    new ResponseObject(false, "เกิดข้อผิดพลาด: " + e.getMessage(), null),
+                    new ResponseObject(false, "ไม่สามารถบันทึกตราประทับได้", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
