@@ -32,9 +32,11 @@ public class AnnouncementController {
     private final AnnouncementService announcementService;
 
     @GetMapping("/all-announcement")
-    public ResponseEntity<ResponseObject> getAllAnnouncements() {
+    public ResponseEntity<ResponseObject> getAllAnnouncements(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", required = false, defaultValue = "20") Integer limit) {
         try {
-            List<AnnouncementResponse> announcements = announcementService.getAllAnnouncements();
+            List<AnnouncementResponse> announcements = announcementService.getAllAnnouncements(page, limit);
             if (announcements.isEmpty()) {
                 return new ResponseEntity<>(
                         new ResponseObject(false, "Announcements research isn't success", null),
@@ -80,7 +82,8 @@ public class AnnouncementController {
             AnnouncementResponse resDto = announcementService.getAnnouncementById(announcement.getAnnouncementId());
 
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Announcement created successfully", resDto != null ? resDto : announcement),
+                    new ResponseObject(true, "Announcement created successfully",
+                            resDto != null ? resDto : announcement),
                     HttpStatus.CREATED);
 
         } catch (Exception e) {
@@ -96,14 +99,17 @@ public class AnnouncementController {
             @RequestParam(value = "announcementId", required = false) String announcementIdStr) {
         try {
             int targetId = 0;
-            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined") && !idStr.equalsIgnoreCase("null")) {
+            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined")
+                    && !idStr.equalsIgnoreCase("null")) {
                 try {
                     targetId = (int) Math.floor(Double.parseDouble(idStr.trim()));
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             } else if (announcementIdStr != null && !announcementIdStr.trim().isEmpty()) {
                 try {
                     targetId = (int) Math.floor(Double.parseDouble(announcementIdStr.trim()));
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
             if (targetId > 0) {
                 announcementService.deleteAnnouncement(targetId);
@@ -126,14 +132,17 @@ public class AnnouncementController {
             @RequestBody @Valid AddAnnouncementDto dto) {
         try {
             int targetId = 0;
-            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined") && !idStr.equalsIgnoreCase("null")) {
+            if (idStr != null && !idStr.trim().isEmpty() && !idStr.equalsIgnoreCase("undefined")
+                    && !idStr.equalsIgnoreCase("null")) {
                 try {
                     targetId = (int) Math.floor(Double.parseDouble(idStr.trim()));
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             } else if (announcementIdStr != null && !announcementIdStr.trim().isEmpty()) {
                 try {
                     targetId = (int) Math.floor(Double.parseDouble(announcementIdStr.trim()));
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
 
             if (targetId <= 0) {
@@ -151,7 +160,8 @@ public class AnnouncementController {
 
             AnnouncementResponse resDto = announcementService.getAnnouncementById(targetId);
             return new ResponseEntity<>(
-                    new ResponseObject(true, "Announcement updated successfully", resDto != null ? resDto : announcement),
+                    new ResponseObject(true, "Announcement updated successfully",
+                            resDto != null ? resDto : announcement),
                     HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

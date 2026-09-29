@@ -9,6 +9,8 @@ import com.example.greenpass.v1.Announcement.entities.Announcement;
 public interface AnnouncementService {
     List<AnnouncementResponse> getAllAnnouncements();
 
+    List<AnnouncementResponse> getAllAnnouncements(Integer page, Integer limit);
+
     AnnouncementResponse getAnnouncementById(int id);
 
     Announcement addAnnouncement(AddAnnouncementDto dto);

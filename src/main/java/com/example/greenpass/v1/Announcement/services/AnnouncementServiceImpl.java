@@ -17,6 +17,11 @@ import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 @Service
 @RequiredArgsConstructor
 public class AnnouncementServiceImpl implements AnnouncementService {
@@ -34,7 +39,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         }
 
         String cleanName = FileUtils.extractFileName(img, "announcements");
-        if (cleanName == null || cleanName.equalsIgnoreCase("news1.jpg") || cleanName.equalsIgnoreCase("src/news1.jpg") || cleanName.equalsIgnoreCase("default.jpg")) {
+        if (cleanName == null || cleanName.equalsIgnoreCase("news1.jpg") || cleanName.equalsIgnoreCase("src/news1.jpg")
+                || cleanName.equalsIgnoreCase("default.jpg")) {
             return null;
         }
 
@@ -53,10 +59,47 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                                 announcement.setImage(cleanName);
                                 announcementRepository.save(announcement);
                             }
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                        }
                     }
                 })
                 .sorted((a, b) -> Integer.compare(b.getAnnouncementId(), a.getAnnouncementId()))
+                .map(announcement -> new AnnouncementResponse(
+                        announcement.getAnnouncementId(),
+                        announcement.getAnnouncementTitle(),
+                        announcement.getPostDate(),
+                        announcement.getDescription(),
+                        announcement.getPark().getName(),
+                        announcement.getPark().getParkId(),
+                        formatImage(announcement)))
+                .toList();
+    }
+
+    @Override
+    public List<AnnouncementResponse> getAllAnnouncements(Integer page, Integer limit) {
+        if (page == null || page < 1)
+            page = 1;
+        if (limit == null || limit < 1)
+            limit = 20;
+
+        // ดึงเฉพาะจำนวนที่ต้องการจาก Database เรียงจาก ID ล่าสุด
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "announcementId"));
+        Page<Announcement> pageResult = announcementRepository.findAll(pageable);
+
+        return pageResult.getContent().stream()
+                .filter(announcement -> announcement != null && announcement.getPark() != null)
+                .peek(announcement -> {
+                    if (announcement.getImage() != null && announcement.getImage().startsWith("data:image")) {
+                        try {
+                            String cleanName = FileUtils.extractFileName(announcement.getImage(), "announcements");
+                            if (cleanName != null) {
+                                announcement.setImage(cleanName);
+                                announcementRepository.save(announcement);
+                            }
+                        } catch (Exception e) {
+                        }
+                    }
+                })
                 .map(announcement -> new AnnouncementResponse(
                         announcement.getAnnouncementId(),
                         announcement.getAnnouncementTitle(),
@@ -81,7 +124,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
                     announcement.setImage(cleanName);
                     announcementRepository.save(announcement);
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
         return new AnnouncementResponse(
                 announcement.getAnnouncementId(),
@@ -161,7 +205,8 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         announcement.setAnnouncementTitle(dto.getTitle());
         announcement.setDescription(dto.getContent());
         announcement.setPostDate(postDate);
-        if (dto.getImage() != null && !dto.getImage().trim().isEmpty() && !dto.getImage().equalsIgnoreCase("null") && !dto.getImage().equals("-")) {
+        if (dto.getImage() != null && !dto.getImage().trim().isEmpty() && !dto.getImage().equalsIgnoreCase("null")
+                && !dto.getImage().equals("-")) {
             String newImage = FileUtils.extractFileName(dto.getImage(), "announcements");
             if (newImage != null && !newImage.trim().isEmpty() && !newImage.equalsIgnoreCase("news1.jpg")) {
                 if (announcement.getImage() != null && !announcement.getImage().equals(newImage)) {
