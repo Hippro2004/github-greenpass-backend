@@ -110,14 +110,62 @@ public class ParkRangerController {
         }
     }
 
+    @PostMapping("/set-role")
+    public ResponseEntity<ResponseObject> setRole(
+            @RequestParam String username,
+            @RequestBody AddParkRangerDto dto) {
+        try {
+            // Alternate Flow 3.1: กรณีที่ผู้ดูแลระบบไม่ได้เลือก Role ระบบจะแสดงข้อความ “กรุณาเลือก Role 1 รายการ”
+            boolean hasAtLeastOneRole = Boolean.TRUE.equals(dto.getCanAnnouncement())
+                    || Boolean.TRUE.equals(dto.getCanIssueStamp())
+                    || Boolean.TRUE.equals(dto.getCanProgressReport())
+                    || Boolean.TRUE.equals(dto.getCanEditParkDetails());
+
+            if (!hasAtLeastOneRole) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "กรุณาเลือก Role 1 รายการ", null),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            ParkRanger ranger = parkRangerService.updateParkRanger(username, dto);
+            if (ranger == null) {
+                // Alternate Flow 5.1.1: กรณีที่ระบบไม่สามารถบันทึกข้อมูลได้
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "ไม่สามารถบันทึกข้อมูลได้กรุณาลองใหม่อีกครั้ง", null),
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            return new ResponseEntity<>(
+                    new ResponseObject(true, "กำหนดสิทธิ์ให้ Park Ranger สำเร็จ", ranger),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Alternate Flow 5.1.1: กรณีที่ระบบไม่สามารถบันทึกข้อมูลได้
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "ไม่สามารถบันทึกข้อมูลได้กรุณาลองใหม่อีกครั้ง", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/update")
     public ResponseEntity<ResponseObject> updateRanger(
             @RequestParam String username,
             @RequestBody @Valid AddParkRangerDto dto) {
         try {
+            // Alternate Flow 3.1: หากมีการส่งข้อมูลสิทธิ์และไม่ได้เลือกสักรายการ
+            if (dto.getCanAnnouncement() != null && dto.getCanIssueStamp() != null
+                    && dto.getCanEditParkDetails() != null && dto.getCanProgressReport() != null) {
+                if (!dto.getCanAnnouncement() && !dto.getCanIssueStamp()
+                        && !dto.getCanEditParkDetails() && !dto.getCanProgressReport()) {
+                    return new ResponseEntity<>(
+                            new ResponseObject(false, "กรุณาเลือก Role 1 รายการ", null),
+                            HttpStatus.BAD_REQUEST);
+                }
+            }
+
             ParkRanger ranger = parkRangerService.updateParkRanger(username, dto);
             if (ranger == null) {
-                return new ResponseEntity<>(new ResponseObject(false, "Park Ranger not found", null),
+                return new ResponseEntity<>(new ResponseObject(false, "ไม่สามารถบันทึกข้อมูลได้กรุณาลองใหม่อีกครั้ง", null),
                         HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(
@@ -125,7 +173,7 @@ public class ParkRangerController {
                     HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(new ResponseObject(false, "Failed to update Park Ranger", null),
+            return new ResponseEntity<>(new ResponseObject(false, "ไม่สามารถบันทึกข้อมูลได้กรุณาลองใหม่อีกครั้ง", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
