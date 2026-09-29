@@ -2,6 +2,7 @@ package com.example.greenpass.v1.Report.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -39,7 +40,6 @@ public class ReportServiceImpl implements ReportService {
     private final ReporyTypeService reportTypeService;
     private final ReportTypeRepository reportTypeRepository;
 
-
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "ยังไม่มีผู้รับผิดชอบ";
         String rangerUsername = null;
@@ -75,7 +75,7 @@ public class ReportServiceImpl implements ReportService {
                 .image(FileUtils.extractFileName(r.getImage(), "reports"))
                 .parkRangerName(rangerName)
                 .parkRangerUsername(rangerUsername)
-                .typeName(r.getType() != null ? r.getType().getTypeName() : "ปกติ")
+                .typeName(r.getType().getTypeName())
                 .build();
     }
 
