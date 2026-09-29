@@ -32,6 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
                         uploadDir.resolve("rewards").toUri().toString(),
                         uploadDir.resolve("reports").toUri().toString(),
                         uploadDir.resolve("signatures").toUri().toString(),
-                        uploadDir.resolve("users").toUri().toString());
+                        uploadDir.resolve("users").toUri().toString(),
+                        uploadDir.resolve("park").toUri().toString());
     }
 }

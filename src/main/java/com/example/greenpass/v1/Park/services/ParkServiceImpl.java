@@ -36,7 +36,12 @@ public class ParkServiceImpl implements ParkService {
             Park existing = parkRepository.findById(park.getParkId()).orElse(null);
             if (existing != null) {
                 if (park.getName() != null) existing.setName(park.getName());
-                if (park.getImage() != null) existing.setImage(park.getImage());
+                if (park.getImage() != null && !park.getImage().trim().isEmpty() && !park.getImage().equalsIgnoreCase("null") && !park.getImage().equals("-")) {
+                    String cleanImage = com.example.greenpass.utils.FileUtils.extractFileName(park.getImage(), "park");
+                    if (cleanImage != null && !cleanImage.trim().isEmpty()) {
+                        existing.setImage(cleanImage);
+                    }
+                }
                 if (park.getAddress() != null) existing.setAddress(park.getAddress());
                 if (park.getLocation() != null) existing.setLocation(park.getLocation());
                 if (park.getDescription() != null) existing.setDescription(park.getDescription());

@@ -36,7 +36,7 @@ public class ParkController {
                                                         .id(p.getParkId())
                                                         .parkId(p.getParkId())
                                                         .name(p.getName())
-                                                        .image(p.getImage())
+                                                        .image(formatParkImage(p.getImage()))
                                                         .address(p.getAddress())
                                                         .location(p.getLocation())
                                                         .description(p.getDescription())
@@ -81,7 +81,7 @@ public class ParkController {
                                         .id(park.getParkId())
                                         .parkId(park.getParkId())
                                         .name(park.getName())
-                                        .image(park.getImage())
+                                        .image(formatParkImage(park.getImage()))
                                         .address(park.getAddress())
                                         .location(park.getLocation())
                                         .description(park.getDescription())
@@ -105,6 +105,24 @@ public class ParkController {
                                         HttpStatus.INTERNAL_SERVER_ERROR);
 
                 }
+        }
+
+        private String formatParkImage(String img) {
+                if (img == null || img.trim().isEmpty() || img.equalsIgnoreCase("null") || img.equals("-")) {
+                        return null;
+                }
+                img = img.trim();
+                if (img.startsWith("http://") || img.startsWith("https://") || img.startsWith("data:image")) {
+                        return img;
+                }
+                if (img.startsWith("/uploads/")) {
+                        return img;
+                }
+                String cleanName = com.example.greenpass.utils.FileUtils.extractFileName(img, "park");
+                if (cleanName == null || cleanName.isEmpty()) {
+                        return null;
+                }
+                return "/uploads/park/" + cleanName;
         }
 
         @PostMapping("/update")
@@ -133,7 +151,18 @@ public class ParkController {
                         if (body.get("description") != null) existing.setDescription(body.get("description").toString());
                         if (body.get("status") != null) existing.setStatus(body.get("status").toString());
                         if (body.get("eventNote") != null) existing.setEventNote(body.get("eventNote").toString());
-                        if (body.get("image") != null) existing.setImage(body.get("image").toString());
+                        if (body.get("image") != null) {
+                                String rawImg = body.get("image").toString().trim();
+                                if (!rawImg.isEmpty() && !rawImg.equalsIgnoreCase("null") && !rawImg.equals("-")) {
+                                        String cleanImage = com.example.greenpass.utils.FileUtils.extractFileName(rawImg, "park");
+                                        if (cleanImage != null && !cleanImage.trim().isEmpty()) {
+                                                if (existing.getImage() != null && !existing.getImage().equals(cleanImage)) {
+                                                        com.example.greenpass.utils.FileUtils.deleteFile(existing.getImage(), "park");
+                                                }
+                                                existing.setImage(cleanImage);
+                                        }
+                                }
+                        }
                         if (body.get("openTime") != null && !body.get("openTime").toString().trim().isEmpty()) {
                                 try {
                                         String ot = body.get("openTime").toString().trim();

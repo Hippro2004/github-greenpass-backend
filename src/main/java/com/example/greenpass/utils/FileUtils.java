@@ -125,7 +125,7 @@ public class FileUtils {
             }
 
             // 3. Search other category directories just in case
-            for (String cat : new String[] { "rewards", "announcements", "reports", "general" }) {
+            for (String cat : new String[] { "rewards", "announcements", "reports", "signatures", "users", "park", "general" }) {
                 Path altPath = Paths.get(BASE_UPLOAD_DIR, cat, cleanFileName).toAbsolutePath().normalize();
                 if (Files.exists(altPath)) {
                     return Files.deleteIfExists(altPath);
