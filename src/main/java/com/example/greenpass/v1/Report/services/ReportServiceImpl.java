@@ -27,6 +27,10 @@ import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * คลาสให้บริการจัดการข้อมูลรายงานความชำรุด/เหตุฉุกเฉิน (Report Service Implementation)
+ * ทำหน้าที่สร้างรายงานใหม่, ดึงข้อมูลตามเงื่อนไขต่างๆ และอัปเดตสถานะการดำเนินงานของเจ้าหน้าที่
+ */
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
@@ -40,10 +44,15 @@ public class ReportServiceImpl implements ReportService {
     private final ReporyTypeService reportTypeService;
     private final ReportTypeRepository reportTypeRepository;
 
+    /**
+     * ฟังก์ชันแปลงข้อมูลจาก Entity (Report) เป็น Response DTO (ReportResponse)
+     * พร้อมตรวจสอบผู้รับผิดชอบรายงานย้อนหลังจากประวัติ ReplyReport หากข้อมูลในตัว Report ยังไม่ได้บันทึกไว้
+     */
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "ยังไม่มีผู้รับผิดชอบ";
         String rangerUsername = null;
 
+        // ตรวจสอบและดึงข้อมูลเจ้าหน้าที่ผู้รับผิดชอบ
         ParkRanger assignedRanger = r.getParkRanger();
         if (assignedRanger == null && r.getReportId() != null) {
             List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(r.getReportId());
@@ -75,10 +84,13 @@ public class ReportServiceImpl implements ReportService {
                 .image(FileUtils.extractFileName(r.getImage(), "reports"))
                 .parkRangerName(rangerName)
                 .parkRangerUsername(rangerUsername)
-                .typeName(r.getType().getTypeName())
+                .typeName(r.getType() != null ? r.getType().getTypeName() : "ปกติ")
                 .build();
     }
 
+    /**
+     * ดึงรายการรายงานทั้งหมดของประชาชนคนนั้นๆ (ค้นหาตาม Username)
+     */
     @Override
     public List<ReportResponse> getAllByUsername(String username) {
         return reportRepository.findAllByUserUsername(username).stream()
@@ -86,16 +98,24 @@ public class ReportServiceImpl implements ReportService {
                 .toList();
     }
 
+    /**
+     * ดึงรายงานฉบับล่าสุดของผู้ใช้งานด้วย Username
+     */
     @Override
     public Report getByUsername(String name) {
         return reportRepository.findByUserUsername(name).orElse(null);
     }
 
+    /**
+     * สร้างรายงานฉบับใหม่ลงในระบบ (Add Report)
+     * พร้อมจำแนกประเภทเหตุการณ์อัตโนมัติ (ปกติ/ร้ายแรง) และสร้างประวัติ ReplyReport เริ่มต้น
+     */
     @Override
     public void addReport(AddReportDto addReportDto, String username) {
         User user = userService.getUserByUsername(username);
         Park park = parkService.getParkById(addReportDto.getParkId());
 
+        // 1. วิเคราะห์และค้นหาประเภทรายงาน (ReportType)
         String inputTypeName = addReportDto.getTypeName();
         ReportType type = null;
         if (inputTypeName != null && !inputTypeName.isBlank()) {
@@ -111,6 +131,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
+        // หากไม่ได้ระบุประเภทมา ให้วิเคราะห์จากข้อความหัวข้อและรายละเอียดเหตุการณ์
         if (type == null) {
             String combinedText = ((addReportDto.getName() != null ? addReportDto.getName() : "") + " "
                     + (addReportDto.getDescription() != null ? addReportDto.getDescription() : "")).toLowerCase();
@@ -123,6 +144,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
+        // 2. บันทึกข้อมูลรายงานลงในฐานข้อมูล
         if (user != null) {
             String cleanImage = FileUtils.extractFileName(addReportDto.getImage(), "reports");
             Report addReport = Report.builder()
@@ -130,7 +152,7 @@ public class ReportServiceImpl implements ReportService {
                     .description(addReportDto.getDescription())
                     .reportDate(LocalDate.now())
                     .reportTime(LocalTime.now())
-                    .status("Pending")
+                    .status("Pending") // สถานะเริ่มต้นเมื่อรับแจ้งเรื่อง
                     .image(cleanImage)
                     .park(park)
                     .user(user)
@@ -138,6 +160,7 @@ public class ReportServiceImpl implements ReportService {
                     .build();
             Report saved = reportRepository.save(addReport);
 
+            // 3. สร้างประวัติการแจ้งเรื่องเริ่มต้นในตาราง ReplyReport
             ReplyReport replyReport = ReplyReport.builder()
                     .updateDate(saved.getReportDate())
                     .updateTime(saved.getReportTime())
@@ -152,6 +175,9 @@ public class ReportServiceImpl implements ReportService {
 
     }
 
+    /**
+     * ดึงรายละเอียดรายงานตาม reportId
+     */
     @Override
     public Report getByReportId(int id) {
         Report report = reportRepository.findByReportId(id).orElse(null);
@@ -171,6 +197,9 @@ public class ReportServiceImpl implements ReportService {
         return report;
     }
 
+    /**
+     * ดึงรายการรายงานทั้งหมดในระบบ เรียงจากล่าสุดไปเก่าสุด (สำหรับแอดมิน)
+     */
     @Override
     public List<ReportResponse> getAllReports() {
         return reportRepository.findAllByOrderByReportIdDesc().stream()
@@ -178,6 +207,9 @@ public class ReportServiceImpl implements ReportService {
                 .toList();
     }
 
+    /**
+     * ดึงรายการรายงานทั้งหมดของอุทยานแห่งชาตินั้นๆ (ค้นหาตาม parkId)
+     */
     @Override
     public List<ReportResponse> getReportsByParkId(int parkId) {
         return reportRepository.findAllByParkParkIdOrderByReportIdDesc(parkId).stream()
@@ -185,6 +217,9 @@ public class ReportServiceImpl implements ReportService {
                 .toList();
     }
 
+    /**
+     * ดึงรายการรายงานตามอุทยานที่เจ้าหน้าที่คนนั้นสังกัดอยู่
+     */
     @Override
     public List<ReportResponse> getReportsByRangerUsername(String rangerUsername) {
         ParkRanger ranger = parkRangerRepository.findByUsername(rangerUsername);
@@ -199,6 +234,10 @@ public class ReportServiceImpl implements ReportService {
         return updateReportStatus(reportId, status, null, null, rangerUsername);
     }
 
+    /**
+     * อัปเดตสถานะการดำเนินงานของรายงาน (Pending -> InProgress -> Completed)
+     * พร้อมบันทึกข้อความความคืบหน้า, รูปภาพหลักฐาน และผู้รับผิดชอบ
+     */
     @Override
     public ReportResponse updateReportStatus(int reportId, String status, String progress, String image,
             String rangerUsername) {
@@ -207,7 +246,7 @@ public class ReportServiceImpl implements ReportService {
             return null;
         }
 
-        // Backfill assigned ranger from existing replies if needed
+        // 1. ค้นหาผู้รับผิดชอบย้อนหลังจากประวัติ Reply หากยังไม่มีการบันทึก
         if (report.getParkRanger() == null) {
             List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(report.getReportId());
             for (ReplyReport rep : replies) {
@@ -224,9 +263,8 @@ public class ReportServiceImpl implements ReportService {
             currentRanger = parkRangerRepository.findByUsername(rangerUsername.trim());
         }
 
-        // 🔒 ตรวจสอบสิทธิ์ผู้รับผิดชอบ:
-        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว
-        // เจ้าหน้าที่คนอื่นไม่สามารถเข้ามาแก้ไขหรือดำเนินการแทนได้
+        // 🔒 2. ตรวจสอบสิทธิ์ผู้รับผิดชอบ:
+        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว เจ้าหน้าที่ท่านอื่นไม่สามารถเข้ามาแก้ไขแทนได้
         if (report.getParkRanger() != null) {
             String assignedUsername = report.getParkRanger().getUsername();
             if (rangerUsername != null && !rangerUsername.isBlank()
@@ -237,15 +275,17 @@ public class ReportServiceImpl implements ReportService {
                         + " แล้ว เจ้าหน้าที่ท่านอื่นไม่สามารถดำเนินการแทนได้");
             }
         } else {
-            // หากยังไม่มีผู้รับผิดชอบ ให้บันทึกเจ้าหน้าที่ผู้นี้เป็นผู้รับผิดชอบรายงานทันที
+            // หากยังไม่มีผู้รับผิดชอบ ให้มอบหมายให้เจ้าหน้าที่ผู้นี้เป็นผู้รับผิดชอบทันที
             if (currentRanger != null) {
                 report.setParkRanger(currentRanger);
             }
         }
 
+        // 3. บันทึกอัปเดตสถานะใหม่ลงใน Entity Report
         report.setStatus(status);
         reportRepository.save(report);
 
+        // 4. บันทึกประวัติความคืบหน้าลงตาราง ReplyReport และกระจายแจ้งเตือน Real-time WebSocket
         String progressText = (progress != null && !progress.isBlank()) ? progress : ("Status updated to " + status);
         String progressImage = (image != null && !image.isBlank())
                 ? FileUtils.extractFileName(image, "reports")
