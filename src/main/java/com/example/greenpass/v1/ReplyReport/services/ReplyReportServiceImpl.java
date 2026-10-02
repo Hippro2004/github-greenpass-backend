@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.ReplyReport.dtos.ReplyReportResponse;
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
@@ -11,22 +12,24 @@ import com.example.greenpass.v1.ReplyReport.repositories.ReplyReporyRepository;
 import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.utils.FileUtils;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 
 /**
- * คลาสให้บริการจัดการข้อมูลการตอบกลับ/อัปเดตความคืบหน้าของรายงานเหตุการณ์ (ReplyReport Service)
- * ทำหน้าที่บันทึกประวัติการอัปเดต, กระจายการแจ้งเตือน Real-time ผ่าน WebSocket และดึงข้อมูลประวัติย้อนหลัง
+ * คลาสให้บริการจัดการข้อมูลการตอบกลับ/อัปเดตความคืบหน้าของรายงานเหตุการณ์
+ * (ReplyReport Service)
+ * ทำหน้าที่บันทึกประวัติการอัปเดต, กระจายการแจ้งเตือน Real-time ผ่าน WebSocket
+ * และดึงข้อมูลประวัติย้อนหลัง
  */
 @Service
 @RequiredArgsConstructor
-@Builder
+@Transactional(readOnly = true)
 public class ReplyReportServiceImpl implements ReplyReportService {
 
     // Repository สำหรับจัดการข้อมูล ReplyReport ในฐานข้อมูล MySQL
     private final ReplyReporyRepository replyReporyRepository;
 
-    // เครื่องมือสำหรับส่งข้อความแจ้งเตือน Real-time ไปยัง Client ผ่าน WebSocket STOMP
+    // เครื่องมือสำหรับส่งข้อความแจ้งเตือน Real-time ไปยัง Client ผ่าน WebSocket
+    // STOMP
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
@@ -34,6 +37,7 @@ public class ReplyReportServiceImpl implements ReplyReportService {
      * พร้อมส่งข้อความแจ้งเตือนแบบ Real-time ไปยังผู้เกี่ยวข้องผ่าน WebSocket
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ReplyReport addReplyReport(ReplyReport replyReport, Report report) {
         // 1. สร้างวัตถุ ReplyReport ใหม่ด้วยข้อมูลที่ส่งเข้ามา
         ReplyReport addReplyReport = ReplyReport.builder()
@@ -77,8 +81,10 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     }
 
     /**
-     * ฟังก์ชันภายใน (Helper Method) สำหรับแปลง Entity (ReplyReport) ให้อยู่ในรูปแบบ DTO (ReplyReportResponse)
-     * เพื่อเตรียมส่งออกให้ Frontend ใช้งานได้อย่างปลอดภัยและตรงตามโครงสร้างที่ต้องการ
+     * ฟังก์ชันภายใน (Helper Method) สำหรับแปลง Entity (ReplyReport) ให้อยู่ในรูปแบบ
+     * DTO (ReplyReportResponse)
+     * เพื่อเตรียมส่งออกให้ Frontend
+     * ใช้งานได้อย่างปลอดภัยและตรงตามโครงสร้างที่ต้องการ
      */
     private ReplyReportResponse mapToResponse(ReplyReport e) {
         String rangerFullName = null;
@@ -111,7 +117,8 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     }
 
     /**
-     * ดึงประวัติการตอบกลับทั้งหมด ของอุทยานแห่งชาตินั้นๆ (ค้นหาตาม parkId) เรียงจากใหม่ไปเก่า
+     * ดึงประวัติการตอบกลับทั้งหมด ของอุทยานแห่งชาตินั้นๆ (ค้นหาตาม parkId)
+     * เรียงจากใหม่ไปเก่า
      */
     @Override
     public List<ReplyReportResponse> getReplyReportByParkId(int parkId) {
@@ -121,7 +128,8 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     }
 
     /**
-     * ดึงประวัติการตอบกลับทั้งหมด ของผู้ใช้งานคนนั้นๆ (ค้นหาตาม username ประชาชน) เรียงจากใหม่ไปเก่า
+     * ดึงประวัติการตอบกลับทั้งหมด ของผู้ใช้งานคนนั้นๆ (ค้นหาตาม username ประชาชน)
+     * เรียงจากใหม่ไปเก่า
      */
     @Override
     public List<ReplyReportResponse> getReplyReportByUsername(String username) {

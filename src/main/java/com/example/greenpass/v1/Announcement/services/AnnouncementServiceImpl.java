@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnnouncementServiceImpl implements AnnouncementService {
     private final AnnouncementRepository announcementRepository;
     private final ParkRangerRepository parkRangerRepository;
