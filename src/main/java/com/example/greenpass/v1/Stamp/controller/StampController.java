@@ -17,7 +17,7 @@ import com.example.greenpass.v1.Stamp.dtos.StampResponse;
 import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
 import com.example.greenpass.v1.Stamp.services.JwtService;
-import com.example.greenpass.v1.Stamp.services.QRService;
+import com.example.greenpass.v1.Stamp.services.QRServiceImpl;
 import com.example.greenpass.v1.Stamp.services.StampService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins = "*")
 public class StampController {
 
-    private final QRService qrService;
+    private final QRServiceImpl qrService;
     private final JwtService jwtService;
     private final StampService stampService;
 

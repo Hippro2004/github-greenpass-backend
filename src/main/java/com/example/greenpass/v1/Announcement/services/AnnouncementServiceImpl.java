@@ -140,6 +140,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Announcement addAnnouncement(AddAnnouncementDto dto) {
         Park park = null;
         if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
@@ -179,6 +180,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAnnouncement(int id) {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
         if (announcement != null) {
@@ -190,6 +192,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Announcement updateAnnouncement(int id, AddAnnouncementDto dto) {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
         if (announcement == null) {

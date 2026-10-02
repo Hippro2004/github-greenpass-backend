@@ -249,6 +249,7 @@ public class ReportServiceImpl implements ReportService {
      * พร้อมบันทึกข้อความความคืบหน้า, รูปภาพหลักฐาน และผู้รับผิดชอบ
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ReportResponse updateReportStatus(int reportId, String status, String progress, String image,
             String rangerUsername) {
         Report report = reportRepository.findByReportId(reportId).orElse(null);

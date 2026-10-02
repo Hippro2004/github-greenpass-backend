@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ParkRangerServiceImpl implements ParkRangerService {
 
     private final ParkRangerRepository parkRangerRepository;
@@ -27,6 +29,7 @@ public class ParkRangerServiceImpl implements ParkRangerService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ParkRanger addParkRanger(AddParkRangerDto dto) {
         int targetParkId = (dto.getParkId() != null && dto.getParkId() > 0) ? dto.getParkId() : 1;
         Park park = null;
@@ -35,7 +38,8 @@ public class ParkRangerServiceImpl implements ParkRangerService {
         } catch (Exception e) {
             try {
                 park = parkService.getParkById(1);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
 
         String username = safeTruncate(dto.getUsername(), 50, "pr" + System.currentTimeMillis());
@@ -57,14 +61,16 @@ public class ParkRangerServiceImpl implements ParkRangerService {
         if (dto.getBirthDate() != null && !dto.getBirthDate().trim().isEmpty()) {
             try {
                 parsedBirthDate = LocalDate.parse(dto.getBirthDate().trim());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         LocalDate parsedStartDate = LocalDate.now();
         if (dto.getStartDate() != null && !dto.getStartDate().trim().isEmpty()) {
             try {
                 parsedStartDate = LocalDate.parse(dto.getStartDate().trim());
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
 
         String signature = "src/sig1.png";
@@ -103,7 +109,8 @@ public class ParkRangerServiceImpl implements ParkRangerService {
     }
 
     private String safeTruncate(String val, int maxLen, String defaultVal) {
-        if (val == null || val.trim().isEmpty()) return defaultVal;
+        if (val == null || val.trim().isEmpty())
+            return defaultVal;
         String trimmed = val.trim();
         return trimmed.length() > maxLen ? trimmed.substring(0, maxLen) : trimmed;
     }
@@ -114,42 +121,59 @@ public class ParkRangerServiceImpl implements ParkRangerService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ParkRanger updateParkRanger(String username, AddParkRangerDto dto) {
         ParkRanger parkRanger = parkRangerRepository.findByUsername(username);
-        if (parkRanger == null) return null;
+        if (parkRanger == null)
+            return null;
 
-        if (dto.getPassword() != null) parkRanger.setPassword(safeTruncate(dto.getPassword(), 16, parkRanger.getPassword()));
-        if (dto.getFirstName() != null) parkRanger.setFirstname(safeTruncate(dto.getFirstName(), 50, parkRanger.getFirstname()));
-        if (dto.getLastName() != null) parkRanger.setSurname(safeTruncate(dto.getLastName(), 50, parkRanger.getSurname()));
+        if (dto.getPassword() != null)
+            parkRanger.setPassword(safeTruncate(dto.getPassword(), 16, parkRanger.getPassword()));
+        if (dto.getFirstName() != null)
+            parkRanger.setFirstname(safeTruncate(dto.getFirstName(), 50, parkRanger.getFirstname()));
+        if (dto.getLastName() != null)
+            parkRanger.setSurname(safeTruncate(dto.getLastName(), 50, parkRanger.getSurname()));
         if (dto.getPhone() != null) {
             String rawPhone = dto.getPhone().replaceAll("[^0-9]", "");
             parkRanger.setMobilephone(safeTruncate(rawPhone, 10, parkRanger.getMobilephone()));
         }
-        if (dto.getEmail() != null) parkRanger.setEmail(safeTruncate(dto.getEmail(), 50, parkRanger.getEmail()));
-        if (dto.getDistrict() != null) parkRanger.setDistrict(safeTruncate(dto.getDistrict(), 20, parkRanger.getDistrict()));
-        if (dto.getSubDistrict() != null) parkRanger.setSubDistrict(safeTruncate(dto.getSubDistrict(), 20, parkRanger.getSubDistrict()));
-        if (dto.getProvince() != null) parkRanger.setProvince(safeTruncate(dto.getProvince(), 20, parkRanger.getProvince()));
-        if (dto.getZipcode() != null) parkRanger.setZipcode(safeTruncate(dto.getZipcode(), 5, parkRanger.getZipcode()));
-        if (dto.getPosition() != null) parkRanger.setPosition(safeTruncate(dto.getPosition(), 25, parkRanger.getPosition()));
+        if (dto.getEmail() != null)
+            parkRanger.setEmail(safeTruncate(dto.getEmail(), 50, parkRanger.getEmail()));
+        if (dto.getDistrict() != null)
+            parkRanger.setDistrict(safeTruncate(dto.getDistrict(), 20, parkRanger.getDistrict()));
+        if (dto.getSubDistrict() != null)
+            parkRanger.setSubDistrict(safeTruncate(dto.getSubDistrict(), 20, parkRanger.getSubDistrict()));
+        if (dto.getProvince() != null)
+            parkRanger.setProvince(safeTruncate(dto.getProvince(), 20, parkRanger.getProvince()));
+        if (dto.getZipcode() != null)
+            parkRanger.setZipcode(safeTruncate(dto.getZipcode(), 5, parkRanger.getZipcode()));
+        if (dto.getPosition() != null)
+            parkRanger.setPosition(safeTruncate(dto.getPosition(), 25, parkRanger.getPosition()));
 
         if (dto.getBirthDate() != null && !dto.getBirthDate().trim().isEmpty()) {
             try {
                 parkRanger.setBirthDate(LocalDate.parse(dto.getBirthDate().trim()));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
         if (dto.getStartDate() != null && !dto.getStartDate().trim().isEmpty()) {
             try {
                 parkRanger.setStartDate(LocalDate.parse(dto.getStartDate().trim()));
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
         if (dto.getGender() != null && dto.getGender() > 0) {
             parkRanger.setGender(dto.getGender());
         }
 
-        if (dto.getCanAnnouncement() != null) parkRanger.setCanAnnouncement(dto.getCanAnnouncement());
-        if (dto.getCanIssueStamp() != null) parkRanger.setCanIssueStamp(dto.getCanIssueStamp());
-        if (dto.getCanProgressReport() != null) parkRanger.setCanProgressReport(dto.getCanProgressReport());
-        if (dto.getCanEditParkDetails() != null) parkRanger.setCanEditParkDetails(dto.getCanEditParkDetails());
+        if (dto.getCanAnnouncement() != null)
+            parkRanger.setCanAnnouncement(dto.getCanAnnouncement());
+        if (dto.getCanIssueStamp() != null)
+            parkRanger.setCanIssueStamp(dto.getCanIssueStamp());
+        if (dto.getCanProgressReport() != null)
+            parkRanger.setCanProgressReport(dto.getCanProgressReport());
+        if (dto.getCanEditParkDetails() != null)
+            parkRanger.setCanEditParkDetails(dto.getCanEditParkDetails());
 
         if (dto.getSignature() != null && !dto.getSignature().trim().isEmpty()) {
             String extracted = FileUtils.extractFileName(dto.getSignature(), "signatures");

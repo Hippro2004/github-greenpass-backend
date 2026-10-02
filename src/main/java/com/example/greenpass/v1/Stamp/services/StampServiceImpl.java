@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.repositories.ParkRepository;
@@ -29,7 +30,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StampServiceImpl implements StampService {
+
     private final UserService userService;
     private final ParkRangerService parkRangerService;
     private final ParkRepository parkRepository;
@@ -180,7 +183,8 @@ public class StampServiceImpl implements StampService {
         }
         PeriodStatistics yearlyStats = periodStatistics(yearlyHistory);
 
-        PeriodStatistics currentMonthlyStats = monthlyStatsByYear.getOrDefault("ปี " + currentYear, periodStatistics(new ArrayList<>()));
+        PeriodStatistics currentMonthlyStats = monthlyStatsByYear.getOrDefault("ปี " + currentYear,
+                periodStatistics(new ArrayList<>()));
 
         long totalThai = yearly.values().stream().mapToLong(v -> v[0]).sum();
         long totalForeigner = yearly.values().stream().mapToLong(v -> v[1]).sum();
