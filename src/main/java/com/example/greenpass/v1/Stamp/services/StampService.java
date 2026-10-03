@@ -2,6 +2,7 @@ package com.example.greenpass.v1.Stamp.services;
 
 import java.util.List;
 
+import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Stamp.dtos.StampResponse;
 import com.example.greenpass.v1.Stamp.dtos.VisitStatisticsResponse;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
@@ -22,4 +23,6 @@ public interface StampService {
     VisitStatisticsResponse getVisitStatistics();
 
     VisitStatisticsResponse getVisitStatistics(Integer parkId, String username);
+
+    Stamp hasUserBeenStamped(String username);
 }

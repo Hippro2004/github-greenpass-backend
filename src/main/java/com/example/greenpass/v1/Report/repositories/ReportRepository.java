@@ -18,4 +18,3 @@ public interface ReportRepository extends JpaRepository<Report, Integer> {
 
     List<Report> findAllByOrderByReportIdDesc();
 }
-

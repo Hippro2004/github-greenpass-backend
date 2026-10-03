@@ -2,7 +2,6 @@ package com.example.greenpass.v1.Report.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
+import com.example.greenpass.v1.Stamp.services.StampService;
 import com.example.greenpass.v1.ReportType.repositories.ReportTypeRepository;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
@@ -47,6 +47,8 @@ public class ReportServiceImpl implements ReportService {
     private final ParkRangerRepository parkRangerRepository;
     private final ReporyTypeService reportTypeService;
     private final ReportTypeRepository reportTypeRepository;
+
+    private final StampService stampService;
 
     /**
      * ฟังก์ชันแปลงข้อมูลจาก Entity (Report) เป็น Response DTO (ReportResponse)
@@ -152,7 +154,6 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
-        // 2. บันทึกข้อมูลรายงานลงในฐานข้อมูล
         if (user != null) {
             String cleanImage = FileUtils.extractFileName(addReportDto.getImage(), "reports");
             Report addReport = Report.builder()

@@ -23,6 +23,6 @@ public interface ReportService {
 
     ReportResponse updateReportStatus(int reportId, String status, String rangerUsername);
 
-    ReportResponse updateReportStatus(int reportId, String status, String progress, String image, String rangerUsername);
+    ReportResponse updateReportStatus(int reportId, String status, String progress, String image,
+            String rangerUsername);
 }
-

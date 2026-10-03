@@ -11,23 +11,25 @@ import org.springframework.data.repository.query.Param;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
 
 public interface StampRepository extends JpaRepository<Stamp, Integer> {
-    List<Stamp> findAllByUserUsername(String username);
+        List<Stamp> findAllByUserUsername(String username);
 
-    List<Stamp> findAllByUserUsernameAndParkParkId(String username, int parkId);
+        List<Stamp> findAllByUserUsernameAndParkParkId(String username, int parkId);
 
-    boolean existsByUserUsernameAndParkParkIdAndStampDate(String username, Integer parkId, LocalDate now);
+        boolean existsByUserUsernameAndParkParkIdAndStampDate(String username, Integer parkId, LocalDate now);
 
-    Optional<Stamp> findTopByUserUsernameAndParkParkIdOrderByStampDateDescTimeDesc(String username, Integer parkId);
+        Optional<Stamp> findTopByUserUsernameAndStampDateOrderByTimeDesc(String username, LocalDate now);
 
-    long countByUserIsForeigner(boolean b);
+        Optional<Stamp> findTopByUserUsernameAndParkParkIdOrderByStampDateDescTimeDesc(String username, Integer parkId);
 
-    @Query("select function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner, count(s) "
-            + "from Stamp s group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
-            + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
-    List<Object[]> findVisitStatistics();
+        long countByUserIsForeigner(boolean b);
 
-    @Query("select function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner, count(s) "
-            + "from Stamp s where s.park.parkId = :parkId group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
-            + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
-    List<Object[]> findVisitStatisticsByParkId(@Param("parkId") int parkId);
+        @Query("select function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner, count(s) "
+                        + "from Stamp s group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
+                        + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
+        List<Object[]> findVisitStatistics();
+
+        @Query("select function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner, count(s) "
+                        + "from Stamp s where s.park.parkId = :parkId group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
+                        + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
+        List<Object[]> findVisitStatisticsByParkId(@Param("parkId") int parkId);
 }

@@ -86,6 +86,13 @@ public class ReplyReportServiceImpl implements ReplyReportService {
      * เพื่อเตรียมส่งออกให้ Frontend
      * ใช้งานได้อย่างปลอดภัยและตรงตามโครงสร้างที่ต้องการ
      */
+    @Override
+    public List<ReplyReportResponse> findAllByReportReportId(Integer reportId) {
+        return replyReporyRepository.findAllByReportReportId(reportId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private ReplyReportResponse mapToResponse(ReplyReport e) {
         String rangerFullName = null;
         String rangerUsername = null;
