@@ -105,8 +105,9 @@ public class ReportController {
         try {
 
             Stamp stamp = stampService.hasUserBeenStamped(username);
-            if (stamp == null) {
-                return new ResponseEntity<>(new ResponseObject(false, "User has not been stamped today", null),
+            if (stamp == null || !stamp.getPark().getParkId().equals(addReportDto.getParkId())) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "User has not been stamped for this park today", null),
                         HttpStatus.BAD_REQUEST);
             }
 
