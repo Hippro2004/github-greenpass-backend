@@ -23,7 +23,6 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public UpdateUserDto editProfileUserDto(String username) {
         User user = getUserByUsername(username);
         if (user == null) {

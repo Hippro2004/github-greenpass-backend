@@ -67,6 +67,7 @@ public class StampServiceImpl implements StampService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void stampUser(String username, String parkrangerUsername) {
         User user = userService.getUserByUsername(username);
         ParkRanger parkRanger = parkRangerService.getParkRangerByUsername(parkrangerUsername);
