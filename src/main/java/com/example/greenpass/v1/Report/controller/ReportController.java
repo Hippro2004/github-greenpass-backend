@@ -103,6 +103,13 @@ public class ReportController {
     public ResponseEntity<ResponseObject> addReport(@RequestHeader("username") String username,
             @RequestBody @Valid AddReportDto addReportDto) {
         try {
+
+            Stamp stamp = stampService.hasUserBeenStamped(username);
+            if (stamp == null) {
+                return new ResponseEntity<>(new ResponseObject(false, "User has not been stamped today", null),
+                        HttpStatus.BAD_REQUEST);
+            }
+
             reportService.addReport(addReportDto, username);
             return new ResponseEntity<>(new ResponseObject(true, "Add Report Success", null),
                     HttpStatus.CREATED);
