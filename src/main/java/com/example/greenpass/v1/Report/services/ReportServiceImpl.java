@@ -178,16 +178,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findByReportId(id).orElse(null);
         if (report != null) {
             report.setImage(FileUtils.extractFileName(report.getImage(), "reports"));
-            if (report.getParkRanger() == null) {
-                List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(report.getReportId());
-                for (ReplyReport rep : replies) {
-                    if (rep.getParkRanger() != null) {
-                        report.setParkRanger(rep.getParkRanger());
-                        reportRepository.save(report);
-                        break;
-                    }
-                }
-            }
         }
         return report;
     }
