@@ -58,17 +58,6 @@ public class ReportServiceImpl implements ReportService {
 
         // ตรวจสอบและดึงข้อมูลเจ้าหน้าที่ผู้รับผิดชอบ
         ParkRanger assignedRanger = r.getParkRanger();
-        if (assignedRanger == null && r.getReportId() != null) {
-            List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(r.getReportId());
-            for (ReplyReport rep : replies) {
-                if (rep.getParkRanger() != null) {
-                    assignedRanger = rep.getParkRanger();
-                    r.setParkRanger(assignedRanger);
-                    reportRepository.save(r);
-                    break;
-                }
-            }
-        }
 
         if (assignedRanger != null) {
             rangerName = (assignedRanger.getFirstname() + " " + assignedRanger.getSurname()).trim();
