@@ -22,4 +22,6 @@ public interface StampService {
     VisitStatisticsResponse getVisitStatistics();
 
     VisitStatisticsResponse getVisitStatistics(Integer parkId, String username);
+
+    Stamp hasUserBeenStamped(String username);
 }

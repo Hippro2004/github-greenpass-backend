@@ -11,9 +11,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Park.entities.Park;
-import com.example.greenpass.v1.Park.repositories.ParkRepository;
+import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
 import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.v1.Stamp.entities.Stamp;
@@ -29,10 +30,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StampServiceImpl implements StampService {
+
     private final UserService userService;
     private final ParkRangerService parkRangerService;
-    private final ParkRepository parkRepository;
+    private final ParkService parkService;
     private final StampRepository stampRepository;
 
     @Override
@@ -64,6 +67,7 @@ public class StampServiceImpl implements StampService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void stampUser(String username, String parkrangerUsername) {
         User user = userService.getUserByUsername(username);
         ParkRanger parkRanger = parkRangerService.getParkRangerByUsername(parkrangerUsername);
@@ -92,6 +96,15 @@ public class StampServiceImpl implements StampService {
         if (username == null || parkId == null)
             return false;
         return stampRepository.existsByUserUsernameAndParkParkIdAndStampDate(username, parkId, LocalDate.now());
+    }
+
+    @Override
+    public Stamp hasUserBeenStamped(String username) {
+        if (username == null) {
+            return null;
+        }
+        return stampRepository.findTopByUserUsernameAndStampDateOrderByTimeDesc(username, LocalDate.now())
+                .orElse(null);
     }
 
     @Override
@@ -180,14 +193,15 @@ public class StampServiceImpl implements StampService {
         }
         PeriodStatistics yearlyStats = periodStatistics(yearlyHistory);
 
-        PeriodStatistics currentMonthlyStats = monthlyStatsByYear.getOrDefault("ปี " + currentYear, periodStatistics(new ArrayList<>()));
+        PeriodStatistics currentMonthlyStats = monthlyStatsByYear.getOrDefault("ปี " + currentYear,
+                periodStatistics(new ArrayList<>()));
 
         long totalThai = yearly.values().stream().mapToLong(v -> v[0]).sum();
         long totalForeigner = yearly.values().stream().mapToLong(v -> v[1]).sum();
 
         String parkName = null;
         if (parkId != null) {
-            Park park = parkRepository.findById(parkId).orElse(null);
+            Park park = parkService.getParkById(parkId);
             if (park != null) {
                 parkName = park.getName();
             }

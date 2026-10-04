@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Announcement.dtos.AddAnnouncementDto;
 import com.example.greenpass.v1.Announcement.dtos.AnnouncementResponse;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AnnouncementServiceImpl implements AnnouncementService {
     private final AnnouncementRepository announcementRepository;
     private final ParkRangerRepository parkRangerRepository;
@@ -138,6 +140,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Announcement addAnnouncement(AddAnnouncementDto dto) {
         Park park = null;
         if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
@@ -177,6 +180,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAnnouncement(int id) {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
         if (announcement != null) {
@@ -188,6 +192,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Announcement updateAnnouncement(int id, AddAnnouncementDto dto) {
         Announcement announcement = announcementRepository.findById(id).orElse(null);
         if (announcement == null) {

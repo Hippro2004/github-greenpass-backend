@@ -1,6 +1,7 @@
 package com.example.greenpass.v1.User.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.User.dtos.RegisterUserDto;
 import com.example.greenpass.v1.User.dtos.UpdateUserDto;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserSerivceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -43,6 +45,7 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void registerUser(RegisterUserDto registerUserDto) {
         User toSaveUser = User.builder()
                 .username(registerUserDto.getUsername())
@@ -64,6 +67,7 @@ public class UserSerivceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateUser(String username, UpdateUserDto dto) {
         User user = getUserByUsername(username);
         user.setFirstname(dto.getFirstname());

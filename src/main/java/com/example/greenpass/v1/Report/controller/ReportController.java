@@ -16,10 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.greenpass.dtos.ResponseObject;
+import com.example.greenpass.v1.Park.entities.Park;
+import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.Report.dtos.AddReportDto;
 import com.example.greenpass.v1.Report.dtos.ReportResponse;
 import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.services.ReportService;
+import com.example.greenpass.v1.Stamp.entities.Stamp;
+import com.example.greenpass.v1.Stamp.services.StampService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReportController {
     private final ReportService reportService;
+    private final StampService stampService;
+    private final ParkService parkService;
 
     @GetMapping("/my-reports")
     public ResponseEntity<ResponseObject> getAllByUsername(@RequestHeader("username") String username) {
@@ -38,6 +44,23 @@ public class ReportController {
             return new ResponseEntity<>(new ResponseObject(true, "Reports found", reports), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to retrieve reports", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/has-stamped")
+    public ResponseEntity<ResponseObject> hasUserBeenStampedToday(@RequestHeader("username") String username) {
+        try {
+            Stamp hasStampedToday = stampService.hasUserBeenStamped(username);
+            if (hasStampedToday == null) {
+                return new ResponseEntity<>(new ResponseObject(false, "User has not been stamped today", null),
+                        HttpStatus.NOT_FOUND);
+            }
+            Park park = parkService.getParkById(hasStampedToday.getPark().getParkId());
+            return new ResponseEntity<>(new ResponseObject(true, "User has been stamped today", park),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to retrieve stamped status", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -51,6 +74,7 @@ public class ReportController {
             return new ResponseEntity<>(new ResponseObject(false, "Failed to retrieve reports", null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
     @GetMapping("/park/{parkId}")
@@ -79,6 +103,14 @@ public class ReportController {
     public ResponseEntity<ResponseObject> addReport(@RequestHeader("username") String username,
             @RequestBody @Valid AddReportDto addReportDto) {
         try {
+
+            Stamp stamp = stampService.hasUserBeenStamped(username);
+            if (stamp == null || !stamp.getPark().getParkId().equals(addReportDto.getParkId())) {
+                return new ResponseEntity<>(
+                        new ResponseObject(false, "User has not been stamped for this park today", null),
+                        HttpStatus.BAD_REQUEST);
+            }
+
             reportService.addReport(addReportDto, username);
             return new ResponseEntity<>(new ResponseObject(true, "Add Report Success", null),
                     HttpStatus.CREATED);
@@ -114,10 +146,12 @@ public class ReportController {
             String progress = payload.get("progress") != null ? payload.get("progress").toString() : null;
             String image = payload.get("image") != null ? payload.get("image").toString() : null;
             String username = usernameHeader;
-            if ((username == null || username.isBlank()) && payload.containsKey("username") && payload.get("username") != null) {
+            if ((username == null || username.isBlank()) && payload.containsKey("username")
+                    && payload.get("username") != null) {
                 username = payload.get("username").toString();
             }
-            if ((username == null || username.isBlank()) && payload.containsKey("rangerUsername") && payload.get("rangerUsername") != null) {
+            if ((username == null || username.isBlank()) && payload.containsKey("rangerUsername")
+                    && payload.get("rangerUsername") != null) {
                 username = payload.get("rangerUsername").toString();
             }
             ReportResponse updated = reportService.updateReportStatus(id, status, progress, image, username);
@@ -131,10 +165,10 @@ public class ReportController {
             return new ResponseEntity<>(new ResponseObject(false, e.getMessage(), null),
                     HttpStatus.FORBIDDEN);
         } catch (Exception e) {
-            return new ResponseEntity<>(new ResponseObject(false, "Failed to update report status: " + e.getMessage(), null),
+            return new ResponseEntity<>(
+                    new ResponseObject(false, "Failed to update report status: " + e.getMessage(), null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
 }
-

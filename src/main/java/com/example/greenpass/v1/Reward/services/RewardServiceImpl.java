@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Reward.dtos.AddRewardDto;
 import com.example.greenpass.v1.Reward.entities.Reward;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RewardServiceImpl implements RewardService {
     private final RewardRepository rewardRepository;
 
@@ -27,7 +29,8 @@ public class RewardServiceImpl implements RewardService {
                         r.setImage(cleanName);
                         rewardRepository.save(r);
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             } else if (r.getImage() != null) {
                 r.setImage(FileUtils.extractFileName(r.getImage(), "rewards"));
             }
@@ -45,7 +48,8 @@ public class RewardServiceImpl implements RewardService {
                         reward.setImage(cleanName);
                         rewardRepository.save(reward);
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             } else if (reward.getImage() != null) {
                 reward.setImage(FileUtils.extractFileName(reward.getImage(), "rewards"));
             }
@@ -54,6 +58,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Reward addReward(AddRewardDto dto) {
         String cleanImage = FileUtils.extractFileName(dto.getImage(), "rewards");
         if (cleanImage == null || cleanImage.trim().isEmpty()) {
@@ -69,6 +74,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Reward updateReward(int id, AddRewardDto dto) {
         Reward reward = rewardRepository.findById(id).orElse(null);
         if (reward == null) {
@@ -88,6 +94,7 @@ public class RewardServiceImpl implements RewardService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteReward(int id) {
         Reward reward = rewardRepository.findById(id).orElse(null);
         if (reward != null) {

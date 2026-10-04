@@ -2,10 +2,10 @@ package com.example.greenpass.v1.Report.services;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
@@ -28,11 +28,14 @@ import com.example.greenpass.utils.FileUtils;
 import lombok.RequiredArgsConstructor;
 
 /**
- * คลาสให้บริการจัดการข้อมูลรายงานความชำรุด/เหตุฉุกเฉิน (Report Service Implementation)
- * ทำหน้าที่สร้างรายงานใหม่, ดึงข้อมูลตามเงื่อนไขต่างๆ และอัปเดตสถานะการดำเนินงานของเจ้าหน้าที่
+ * คลาสให้บริการจัดการข้อมูลรายงานความชำรุด/เหตุฉุกเฉิน (Report Service
+ * Implementation)
+ * ทำหน้าที่สร้างรายงานใหม่, ดึงข้อมูลตามเงื่อนไขต่างๆ
+ * และอัปเดตสถานะการดำเนินงานของเจ้าหน้าที่
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReportServiceImpl implements ReportService {
 
     private final ReportRepository reportRepository;
@@ -46,7 +49,8 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * ฟังก์ชันแปลงข้อมูลจาก Entity (Report) เป็น Response DTO (ReportResponse)
-     * พร้อมตรวจสอบผู้รับผิดชอบรายงานย้อนหลังจากประวัติ ReplyReport หากข้อมูลในตัว Report ยังไม่ได้บันทึกไว้
+     * พร้อมตรวจสอบผู้รับผิดชอบรายงานย้อนหลังจากประวัติ ReplyReport หากข้อมูลในตัว
+     * Report ยังไม่ได้บันทึกไว้
      */
     private ReportResponse mapToResponse(Report r) {
         String rangerName = "ยังไม่มีผู้รับผิดชอบ";
@@ -54,17 +58,6 @@ public class ReportServiceImpl implements ReportService {
 
         // ตรวจสอบและดึงข้อมูลเจ้าหน้าที่ผู้รับผิดชอบ
         ParkRanger assignedRanger = r.getParkRanger();
-        if (assignedRanger == null && r.getReportId() != null) {
-            List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(r.getReportId());
-            for (ReplyReport rep : replies) {
-                if (rep.getParkRanger() != null) {
-                    assignedRanger = rep.getParkRanger();
-                    r.setParkRanger(assignedRanger);
-                    reportRepository.save(r);
-                    break;
-                }
-            }
-        }
 
         if (assignedRanger != null) {
             rangerName = (assignedRanger.getFirstname() + " " + assignedRanger.getSurname()).trim();
@@ -108,9 +101,12 @@ public class ReportServiceImpl implements ReportService {
 
     /**
      * สร้างรายงานฉบับใหม่ลงในระบบ (Add Report)
-     * พร้อมจำแนกประเภทเหตุการณ์อัตโนมัติ (ปกติ/ร้ายแรง) และสร้างประวัติ ReplyReport เริ่มต้น
+     * พร้อมจำแนกประเภทเหตุการณ์อัตโนมัติ (ปกติ/ร้ายแรง) และสร้างประวัติ ReplyReport
+     * เริ่มต้น
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
+
     public void addReport(AddReportDto addReportDto, String username) {
         User user = userService.getUserByUsername(username);
         Park park = parkService.getParkById(addReportDto.getParkId());
@@ -144,7 +140,6 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
-        // 2. บันทึกข้อมูลรายงานลงในฐานข้อมูล
         if (user != null) {
             String cleanImage = FileUtils.extractFileName(addReportDto.getImage(), "reports");
             Report addReport = Report.builder()
@@ -183,16 +178,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findByReportId(id).orElse(null);
         if (report != null) {
             report.setImage(FileUtils.extractFileName(report.getImage(), "reports"));
-            if (report.getParkRanger() == null) {
-                List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(report.getReportId());
-                for (ReplyReport rep : replies) {
-                    if (rep.getParkRanger() != null) {
-                        report.setParkRanger(rep.getParkRanger());
-                        reportRepository.save(report);
-                        break;
-                    }
-                }
-            }
         }
         return report;
     }
@@ -230,6 +215,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+
     public ReportResponse updateReportStatus(int reportId, String status, String rangerUsername) {
         return updateReportStatus(reportId, status, null, null, rangerUsername);
     }
@@ -239,6 +226,7 @@ public class ReportServiceImpl implements ReportService {
      * พร้อมบันทึกข้อความความคืบหน้า, รูปภาพหลักฐาน และผู้รับผิดชอบ
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ReportResponse updateReportStatus(int reportId, String status, String progress, String image,
             String rangerUsername) {
         Report report = reportRepository.findByReportId(reportId).orElse(null);
@@ -264,7 +252,8 @@ public class ReportServiceImpl implements ReportService {
         }
 
         // 🔒 2. ตรวจสอบสิทธิ์ผู้รับผิดชอบ:
-        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว เจ้าหน้าที่ท่านอื่นไม่สามารถเข้ามาแก้ไขแทนได้
+        // หากรายงานนี้มีเจ้าหน้าที่ผู้รับผิดชอบอยู่แล้ว
+        // เจ้าหน้าที่ท่านอื่นไม่สามารถเข้ามาแก้ไขแทนได้
         if (report.getParkRanger() != null) {
             String assignedUsername = report.getParkRanger().getUsername();
             if (rangerUsername != null && !rangerUsername.isBlank()
@@ -285,7 +274,8 @@ public class ReportServiceImpl implements ReportService {
         report.setStatus(status);
         reportRepository.save(report);
 
-        // 4. บันทึกประวัติความคืบหน้าลงตาราง ReplyReport และกระจายแจ้งเตือน Real-time WebSocket
+        // 4. บันทึกประวัติความคืบหน้าลงตาราง ReplyReport และกระจายแจ้งเตือน Real-time
+        // WebSocket
         String progressText = (progress != null && !progress.isBlank()) ? progress : ("Status updated to " + status);
         String progressImage = (image != null && !image.isBlank())
                 ? FileUtils.extractFileName(image, "reports")
