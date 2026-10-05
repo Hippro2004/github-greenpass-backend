@@ -99,10 +99,10 @@ public class ParkRangerServiceImpl implements ParkRangerService {
                 .zipcode(zipcode)
                 .position(position)
                 .startDate(parsedStartDate)
-                .canAnnouncement(true)
-                .canIssueStamp(true)
-                .canProgressReport(true)
-                .canEditParkDetails(true)
+                .canAnnouncement(dto.getCanAnnouncement() != null ? dto.getCanAnnouncement() : false)
+                .canIssueStamp(dto.getCanIssueStamp() != null ? dto.getCanIssueStamp() : false)
+                .canProgressReport(dto.getCanProgressReport() != null ? dto.getCanProgressReport() : false)
+                .canEditParkDetails(dto.getCanEditParkDetails() != null ? dto.getCanEditParkDetails() : false)
                 .park(park)
                 .build();
         return parkRangerRepository.save(ranger);
