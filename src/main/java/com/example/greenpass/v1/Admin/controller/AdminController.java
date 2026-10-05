@@ -101,6 +101,8 @@ public class AdminController {
             long totalProcessingReport = allReports.stream()
                     .filter(r -> r.getStatus() != null && (
                         "Pending".equalsIgnoreCase(r.getStatus()) || 
+                        "Acknowledged".equalsIgnoreCase(r.getStatus()) || 
+                        "รับทราบ".equalsIgnoreCase(r.getStatus()) || 
                         "InProgress".equalsIgnoreCase(r.getStatus()) || 
                         "แจ้งรายงาน".equalsIgnoreCase(r.getStatus()) || 
                         "กำลังดำเนินการ".equalsIgnoreCase(r.getStatus())
@@ -140,6 +142,8 @@ public class AdminController {
                 long inProg = pReports.stream()
                         .filter(r -> r.getStatus() != null && (
                             "Pending".equalsIgnoreCase(r.getStatus()) || 
+                            "Acknowledged".equalsIgnoreCase(r.getStatus()) || 
+                            "รับทราบ".equalsIgnoreCase(r.getStatus()) || 
                             "InProgress".equalsIgnoreCase(r.getStatus()) || 
                             "แจ้งรายงาน".equalsIgnoreCase(r.getStatus()) || 
                             "กำลังดำเนินการ".equalsIgnoreCase(r.getStatus())

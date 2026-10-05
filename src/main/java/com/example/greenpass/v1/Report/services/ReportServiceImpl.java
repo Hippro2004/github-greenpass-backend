@@ -279,7 +279,7 @@ public class ReportServiceImpl implements ReportService {
         String progressText = (progress != null && !progress.isBlank()) ? progress : ("Status updated to " + status);
         String progressImage = (image != null && !image.isBlank())
                 ? FileUtils.extractFileName(image, "reports")
-                : FileUtils.extractFileName(report.getImage(), "reports");
+                : null;
 
         ReplyReport replyReport = ReplyReport.builder()
                 .updateDate(LocalDate.now())
