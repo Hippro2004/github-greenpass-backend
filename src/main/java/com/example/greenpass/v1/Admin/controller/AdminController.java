@@ -27,6 +27,8 @@ import com.example.greenpass.v1.Park.repositories.ParkRepository;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
 import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
+import com.example.greenpass.v1.Stamp.entities.Stamp;
+import com.example.greenpass.v1.Stamp.repositories.StampRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,7 @@ public class AdminController {
     private final ParkRangerRepository parkRangerRepository;
     private final AnnouncementRepository announcementRepository;
     private final ReportRepository reportRepository;
+    private final StampRepository stampRepository;
 
     @PostMapping("/login")
     public ResponseEntity<ResponseObject> login(@RequestBody @Valid LoginAdminDto loginAdminDto) {
@@ -77,6 +80,8 @@ public class AdminController {
             List<Report> allReports = reportRepository.findAll();
             List<Announcement> announcements = announcementRepository.findAll();
 
+            List<Stamp> allStamps = stampRepository.findAll();
+
             if (year != null && year > 0) {
                 int targetYear = year > 2500 ? year - 543 : year;
                 allReports = allReports.stream()
@@ -84,6 +89,9 @@ public class AdminController {
                         .toList();
                 announcements = announcements.stream()
                         .filter(a -> a.getPostDate() != null && a.getPostDate().getYear() == targetYear)
+                        .toList();
+                allStamps = allStamps.stream()
+                        .filter(s -> s.getStampDate() != null && s.getStampDate().getYear() == targetYear)
                         .toList();
             }
 
@@ -93,6 +101,9 @@ public class AdminController {
                         .toList();
                 announcements = announcements.stream()
                         .filter(a -> a.getPostDate() != null && a.getPostDate().getMonthValue() == month)
+                        .toList();
+                allStamps = allStamps.stream()
+                        .filter(s -> s.getStampDate() != null && s.getStampDate().getMonthValue() == month)
                         .toList();
             }
 
@@ -116,17 +127,9 @@ public class AdminController {
                     ))
                     .count();
 
-            Map<String, Object> metrics = new HashMap<>();
-            metrics.put("totalPark", totalPark);
-            metrics.put("totalRanger", totalRanger);
-            metrics.put("totalNews", totalNews);
-            metrics.put("totalReport", totalReport);
-            metrics.put("totalProcessingReport", totalProcessingReport);
-            metrics.put("totalCompletedReport", totalCompletedReport);
-
             List<Park> parks = parkRepository.findAll();
             
-            // Pre-group announcements and reports by parkId to optimize performance to O(N)
+            // Pre-group announcements, reports, and stamps by parkId
             Map<Integer, Long> newsByPark = announcements.stream()
                     .filter(a -> a.getPark() != null && a.getPark().getParkId() != null)
                     .collect(Collectors.groupingBy(a -> a.getPark().getParkId(), Collectors.counting()));
@@ -135,9 +138,22 @@ public class AdminController {
                     .filter(r -> r.getPark() != null && r.getPark().getParkId() != null)
                     .collect(Collectors.groupingBy(r -> r.getPark().getParkId()));
 
+            Map<Integer, List<Stamp>> stampsByPark = allStamps.stream()
+                    .filter(s -> s.getPark() != null && s.getPark().getParkId() != null)
+                    .collect(Collectors.groupingBy(s -> s.getPark().getParkId()));
+
             List<StatisticsResponse.ParkStatDto> parkStats = parks.stream().map(p -> {
                 long newsCount = newsByPark.getOrDefault(p.getParkId(), 0L);
                 List<Report> pReports = reportsByPark.getOrDefault(p.getParkId(), List.of());
+                List<Stamp> pStamps = stampsByPark.getOrDefault(p.getParkId(), List.of());
+
+                long thaiVisitors = pStamps.stream()
+                        .filter(s -> s.getUser() == null || !s.getUser().isForeigner())
+                        .count();
+                long foreignVisitors = pStamps.stream()
+                        .filter(s -> s.getUser() != null && s.getUser().isForeigner())
+                        .count();
+                long totalVisitors = thaiVisitors + foreignVisitors;
 
                 long inProg = pReports.stream()
                         .filter(r -> r.getStatus() != null && (
@@ -186,8 +202,26 @@ public class AdminController {
                         .totalReports(pReports.size())
                         .inProgress(inProg)
                         .completed(comp)
+                        .thaiVisitors(thaiVisitors)
+                        .foreignVisitors(foreignVisitors)
+                        .totalVisitors(totalVisitors)
                         .build();
             }).toList();
+
+            long sumTotalVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getTotalVisitors).sum();
+            long sumThaiVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getThaiVisitors).sum();
+            long sumForeignVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getForeignVisitors).sum();
+
+            Map<String, Object> metrics = new HashMap<>();
+            metrics.put("totalPark", totalPark);
+            metrics.put("totalRanger", totalRanger);
+            metrics.put("totalNews", totalNews);
+            metrics.put("totalReport", totalReport);
+            metrics.put("totalProcessingReport", totalProcessingReport);
+            metrics.put("totalCompletedReport", totalCompletedReport);
+            metrics.put("totalVisitors", sumTotalVisitors);
+            metrics.put("totalThaiVisitors", sumThaiVisitors);
+            metrics.put("totalForeignVisitors", sumForeignVisitors);
 
             StatisticsResponse responseData = StatisticsResponse.builder()
                     .metrics(metrics)

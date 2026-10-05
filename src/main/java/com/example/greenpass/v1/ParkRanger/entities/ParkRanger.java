@@ -77,7 +77,7 @@ public class ParkRanger {
     private boolean canEditParkDetails;
 
     @ManyToOne
-    @JoinColumn(name = "parkId", nullable = false)
+    @JoinColumn(name = "park_id", nullable = false)
     @JsonIgnoreProperties({"parkRangers", "stamps"})
     private Park park;
 }

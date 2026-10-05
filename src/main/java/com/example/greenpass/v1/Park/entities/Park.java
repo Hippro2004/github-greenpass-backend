@@ -68,8 +68,7 @@ public class Park {
     @Column(nullable = false)
     private String status;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "parkId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "park")
     @JsonIgnore
     private List<Stamp> stamps = new ArrayList<>();
 

@@ -31,5 +31,8 @@ public class StatisticsResponse {
         private long totalReports;
         private long inProgress;
         private long completed;
+        private long thaiVisitors;
+        private long foreignVisitors;
+        private long totalVisitors;
     }
 }

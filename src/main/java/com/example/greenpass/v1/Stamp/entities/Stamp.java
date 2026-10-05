@@ -43,12 +43,12 @@ public class Stamp {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "parkId", nullable = false)
+    @JoinColumn(name = "park_id", nullable = false)
     @JsonBackReference(value = "park-stamps")
     private Park park;
 
     @ManyToOne
-    @JoinColumn(name = "usernameParkRanger", nullable = false)
+    @JoinColumn(name = "username_park_ranger", nullable = false)
     private ParkRanger parkRanger;
 
 }
