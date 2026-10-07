@@ -32,4 +32,10 @@ public interface StampRepository extends JpaRepository<Stamp, Integer> {
                         + "from Stamp s where s.park.parkId = :parkId group by function('YEAR', s.stampDate), function('MONTH', s.stampDate), s.user.isForeigner "
                         + "order by function('YEAR', s.stampDate), function('MONTH', s.stampDate)")
         List<Object[]> findVisitStatisticsByParkId(@Param("parkId") int parkId);
+
+        @Query("SELECT s.park.parkId, s.user.isForeigner, COUNT(s) FROM Stamp s " +
+               "WHERE (:year IS NULL OR function('YEAR', s.stampDate) = :year) " +
+               "AND (:month IS NULL OR function('MONTH', s.stampDate) = :month) " +
+               "GROUP BY s.park.parkId, s.user.isForeigner")
+        List<Object[]> countVisitorsByParkAndFilters(@Param("year") Integer year, @Param("month") Integer month);
 }

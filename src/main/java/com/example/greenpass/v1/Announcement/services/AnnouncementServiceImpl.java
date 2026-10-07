@@ -13,7 +13,7 @@ import com.example.greenpass.v1.Announcement.repositories.AnnouncementRepository
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
-import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
+import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
 import com.example.greenpass.utils.FileUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import org.springframework.data.domain.Sort;
 @Transactional(readOnly = true)
 public class AnnouncementServiceImpl implements AnnouncementService {
     private final AnnouncementRepository announcementRepository;
-    private final ParkRangerRepository parkRangerRepository;
+    private final ParkRangerService parkRangerService;
     private final ParkService parkService;
 
     private String formatImage(Announcement announcement) {
@@ -144,7 +144,7 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     public Announcement addAnnouncement(AddAnnouncementDto dto) {
         Park park = null;
         if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
-            ParkRanger ranger = parkRangerRepository.findByUsername(dto.getUsername().trim());
+            ParkRanger ranger = parkRangerService.getParkRangerByUsername(dto.getUsername().trim());
             if (ranger != null && ranger.getPark() != null) {
                 park = ranger.getPark();
             }

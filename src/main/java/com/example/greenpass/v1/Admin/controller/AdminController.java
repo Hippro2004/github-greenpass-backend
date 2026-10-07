@@ -77,102 +77,82 @@ public class AdminController {
             long totalPark = parkRepository.count();
             long totalRanger = parkRangerRepository.count();
 
-            List<Report> allReports = reportRepository.findAll();
-            List<Announcement> announcements = announcementRepository.findAll();
+            Integer targetYear = (year != null && year > 0) ? (year > 2500 ? year - 543 : year) : null;
+            Integer targetMonth = (month != null && month >= 1 && month <= 12) ? month : null;
 
-            List<Stamp> allStamps = stampRepository.findAll();
+            // 1. Fetch aggregated stats directly from Database using SQL/JPQL GROUP BY (Blazing Fast!)
+            List<Object[]> newsRows = announcementRepository.countAnnouncementsByParkAndFilters(targetYear, targetMonth);
+            List<Object[]> reportRows = reportRepository.countReportsByParkAndFilters(targetYear, targetMonth);
+            List<Object[]> visitorRows = stampRepository.countVisitorsByParkAndFilters(targetYear, targetMonth);
 
-            if (year != null && year > 0) {
-                int targetYear = year > 2500 ? year - 543 : year;
-                allReports = allReports.stream()
-                        .filter(r -> r.getReportDate() != null && r.getReportDate().getYear() == targetYear)
-                        .toList();
-                announcements = announcements.stream()
-                        .filter(a -> a.getPostDate() != null && a.getPostDate().getYear() == targetYear)
-                        .toList();
-                allStamps = allStamps.stream()
-                        .filter(s -> s.getStampDate() != null && s.getStampDate().getYear() == targetYear)
-                        .toList();
+            Map<Integer, Long> newsByPark = new HashMap<>();
+            for (Object[] r : newsRows) {
+                if (r[0] != null) {
+                    newsByPark.put((Integer) r[0], ((Number) r[1]).longValue());
+                }
             }
 
-            if (month != null && month >= 1 && month <= 12) {
-                allReports = allReports.stream()
-                        .filter(r -> r.getReportDate() != null && r.getReportDate().getMonthValue() == month)
-                        .toList();
-                announcements = announcements.stream()
-                        .filter(a -> a.getPostDate() != null && a.getPostDate().getMonthValue() == month)
-                        .toList();
-                allStamps = allStamps.stream()
-                        .filter(s -> s.getStampDate() != null && s.getStampDate().getMonthValue() == month)
-                        .toList();
+            Map<Integer, Long> inProgressReportsByPark = new HashMap<>();
+            Map<Integer, Long> completedReportsByPark = new HashMap<>();
+            Map<Integer, Long> totalReportsByPark = new HashMap<>();
+            long totalReportCount = 0;
+            long totalProcessingReportCount = 0;
+            long totalCompletedReportCount = 0;
+
+            for (Object[] r : reportRows) {
+                if (r[0] != null) {
+                    Integer parkId = (Integer) r[0];
+                    String status = (String) r[1];
+                    long count = ((Number) r[2]).longValue();
+
+                    totalReportsByPark.merge(parkId, count, Long::sum);
+                    totalReportCount += count;
+
+                    if (status != null) {
+                        if ("Pending".equalsIgnoreCase(status) || "Acknowledged".equalsIgnoreCase(status)
+                                || "รับทราบ".equalsIgnoreCase(status) || "InProgress".equalsIgnoreCase(status)
+                                || "แจ้งรายงาน".equalsIgnoreCase(status) || "กำลังดำเนินการ".equalsIgnoreCase(status)) {
+                            inProgressReportsByPark.merge(parkId, count, Long::sum);
+                            totalProcessingReportCount += count;
+                        } else if ("Completed".equalsIgnoreCase(status)
+                                || "ดำเนินการแก้ไขสำเร็จ".equalsIgnoreCase(status)
+                                || "ดำเนินการสำเร็จ".equalsIgnoreCase(status)) {
+                            completedReportsByPark.merge(parkId, count, Long::sum);
+                            totalCompletedReportCount += count;
+                        }
+                    }
+                }
             }
 
-            long totalNews = announcements.size();
-            long totalReport = allReports.size();
-            long totalProcessingReport = allReports.stream()
-                    .filter(r -> r.getStatus() != null && (
-                        "Pending".equalsIgnoreCase(r.getStatus()) || 
-                        "Acknowledged".equalsIgnoreCase(r.getStatus()) || 
-                        "รับทราบ".equalsIgnoreCase(r.getStatus()) || 
-                        "InProgress".equalsIgnoreCase(r.getStatus()) || 
-                        "แจ้งรายงาน".equalsIgnoreCase(r.getStatus()) || 
-                        "กำลังดำเนินการ".equalsIgnoreCase(r.getStatus())
-                    ))
-                    .count();
-            long totalCompletedReport = allReports.stream()
-                    .filter(r -> r.getStatus() != null && (
-                        "Completed".equalsIgnoreCase(r.getStatus()) || 
-                        "ดำเนินการแก้ไขสำเร็จ".equalsIgnoreCase(r.getStatus()) || 
-                        "ดำเนินการสำเร็จ".equalsIgnoreCase(r.getStatus())
-                    ))
-                    .count();
+            Map<Integer, Long> thaiVisitorsByPark = new HashMap<>();
+            Map<Integer, Long> foreignVisitorsByPark = new HashMap<>();
 
+            for (Object[] r : visitorRows) {
+                if (r[0] != null) {
+                    Integer parkId = (Integer) r[0];
+                    Boolean isForeigner = (Boolean) r[1];
+                    long count = ((Number) r[2]).longValue();
+
+                    if (Boolean.TRUE.equals(isForeigner)) {
+                        foreignVisitorsByPark.merge(parkId, count, Long::sum);
+                    } else {
+                        thaiVisitorsByPark.merge(parkId, count, Long::sum);
+                    }
+                }
+            }
+
+            long totalNewsCount = newsByPark.values().stream().mapToLong(Long::longValue).sum();
             List<Park> parks = parkRepository.findAll();
-            
-            // Pre-group announcements, reports, and stamps by parkId
-            Map<Integer, Long> newsByPark = announcements.stream()
-                    .filter(a -> a.getPark() != null && a.getPark().getParkId() != null)
-                    .collect(Collectors.groupingBy(a -> a.getPark().getParkId(), Collectors.counting()));
-
-            Map<Integer, List<Report>> reportsByPark = allReports.stream()
-                    .filter(r -> r.getPark() != null && r.getPark().getParkId() != null)
-                    .collect(Collectors.groupingBy(r -> r.getPark().getParkId()));
-
-            Map<Integer, List<Stamp>> stampsByPark = allStamps.stream()
-                    .filter(s -> s.getPark() != null && s.getPark().getParkId() != null)
-                    .collect(Collectors.groupingBy(s -> s.getPark().getParkId()));
 
             List<StatisticsResponse.ParkStatDto> parkStats = parks.stream().map(p -> {
-                long newsCount = newsByPark.getOrDefault(p.getParkId(), 0L);
-                List<Report> pReports = reportsByPark.getOrDefault(p.getParkId(), List.of());
-                List<Stamp> pStamps = stampsByPark.getOrDefault(p.getParkId(), List.of());
-
-                long thaiVisitors = pStamps.stream()
-                        .filter(s -> s.getUser() == null || !s.getUser().isForeigner())
-                        .count();
-                long foreignVisitors = pStamps.stream()
-                        .filter(s -> s.getUser() != null && s.getUser().isForeigner())
-                        .count();
+                int parkId = p.getParkId();
+                long newsCount = newsByPark.getOrDefault(parkId, 0L);
+                long totReports = totalReportsByPark.getOrDefault(parkId, 0L);
+                long inProg = inProgressReportsByPark.getOrDefault(parkId, 0L);
+                long comp = completedReportsByPark.getOrDefault(parkId, 0L);
+                long thaiVisitors = thaiVisitorsByPark.getOrDefault(parkId, 0L);
+                long foreignVisitors = foreignVisitorsByPark.getOrDefault(parkId, 0L);
                 long totalVisitors = thaiVisitors + foreignVisitors;
-
-                long inProg = pReports.stream()
-                        .filter(r -> r.getStatus() != null && (
-                            "Pending".equalsIgnoreCase(r.getStatus()) || 
-                            "Acknowledged".equalsIgnoreCase(r.getStatus()) || 
-                            "รับทราบ".equalsIgnoreCase(r.getStatus()) || 
-                            "InProgress".equalsIgnoreCase(r.getStatus()) || 
-                            "แจ้งรายงาน".equalsIgnoreCase(r.getStatus()) || 
-                            "กำลังดำเนินการ".equalsIgnoreCase(r.getStatus())
-                        ))
-                        .count();
-
-                long comp = pReports.stream()
-                        .filter(r -> r.getStatus() != null && (
-                            "Completed".equalsIgnoreCase(r.getStatus()) || 
-                            "ดำเนินการแก้ไขสำเร็จ".equalsIgnoreCase(r.getStatus()) || 
-                            "ดำเนินการสำเร็จ".equalsIgnoreCase(r.getStatus())
-                        ))
-                        .count();
 
                 String province = "ทั่วไป";
                 if (p.getAddress() != null) {
@@ -195,11 +175,11 @@ public class AdminController {
                 }
 
                 return StatisticsResponse.ParkStatDto.builder()
-                        .parkId(p.getParkId())
+                        .parkId(parkId)
                         .parkName(p.getName())
                         .province(province)
                         .announcements(newsCount)
-                        .totalReports(pReports.size())
+                        .totalReports((int) totReports)
                         .inProgress(inProg)
                         .completed(comp)
                         .thaiVisitors(thaiVisitors)
@@ -215,10 +195,10 @@ public class AdminController {
             Map<String, Object> metrics = new HashMap<>();
             metrics.put("totalPark", totalPark);
             metrics.put("totalRanger", totalRanger);
-            metrics.put("totalNews", totalNews);
-            metrics.put("totalReport", totalReport);
-            metrics.put("totalProcessingReport", totalProcessingReport);
-            metrics.put("totalCompletedReport", totalCompletedReport);
+            metrics.put("totalNews", totalNewsCount);
+            metrics.put("totalReport", totalReportCount);
+            metrics.put("totalProcessingReport", totalProcessingReportCount);
+            metrics.put("totalCompletedReport", totalCompletedReportCount);
             metrics.put("totalVisitors", sumTotalVisitors);
             metrics.put("totalThaiVisitors", sumThaiVisitors);
             metrics.put("totalForeignVisitors", sumForeignVisitors);

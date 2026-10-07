@@ -10,9 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.services.ParkService;
 import com.example.greenpass.v1.ParkRanger.entities.ParkRanger;
-import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
+import com.example.greenpass.v1.ParkRanger.services.ParkRangerService;
+import com.example.greenpass.v1.ReplyReport.dtos.ReplyReportResponse;
 import com.example.greenpass.v1.ReplyReport.entities.ReplyReport;
-import com.example.greenpass.v1.ReplyReport.repositories.ReplyReporyRepository;
 import com.example.greenpass.v1.ReplyReport.services.ReplyReportService;
 import com.example.greenpass.v1.Report.dtos.AddReportDto;
 import com.example.greenpass.v1.Report.dtos.ReportResponse;
@@ -20,7 +20,6 @@ import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
 import com.example.greenpass.v1.ReportType.entities.ReportType;
 import com.example.greenpass.v1.ReportType.services.ReporyTypeService;
-import com.example.greenpass.v1.ReportType.repositories.ReportTypeRepository;
 import com.example.greenpass.v1.User.entities.User;
 import com.example.greenpass.v1.User.services.UserService;
 import com.example.greenpass.utils.FileUtils;
@@ -40,12 +39,10 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportRepository reportRepository;
     private final ReplyReportService replyReportService;
-    private final ReplyReporyRepository replyReporyRepository;
     private final UserService userService;
     private final ParkService parkService;
-    private final ParkRangerRepository parkRangerRepository;
+    private final ParkRangerService parkRangerService;
     private final ReporyTypeService reportTypeService;
-    private final ReportTypeRepository reportTypeRepository;
 
     /**
      * ฟังก์ชันแปลงข้อมูลจาก Entity (Report) เป็น Response DTO (ReportResponse)
@@ -120,9 +117,9 @@ public class ReportServiceImpl implements ReportService {
             if (type == null) {
                 if ("2".equals(trimmed) || trimmed.contains("ร้ายแรง") || trimmed.contains("ฉุกเฉิน")
                         || trimmed.equalsIgnoreCase("severe") || trimmed.equalsIgnoreCase("emergency")) {
-                    type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
+                    type = reportTypeService.getTypeByName("ร้ายแรง");
                 } else if ("1".equals(trimmed) || trimmed.contains("ปกติ") || trimmed.equalsIgnoreCase("normal")) {
-                    type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
+                    type = reportTypeService.getTypeByName("ปกติ");
                 }
             }
         }
@@ -134,9 +131,9 @@ public class ReportServiceImpl implements ReportService {
             if (combinedText.contains("ร้ายแรง") || combinedText.contains("ฉุกเฉิน")
                     || combinedText.contains("emergency") || combinedText.contains("danger")
                     || combinedText.contains("help")) {
-                type = reportTypeRepository.findByTypeName("ร้ายแรง").orElse(null);
+                type = reportTypeService.getTypeByName("ร้ายแรง");
             } else {
-                type = reportTypeRepository.findByTypeName("ปกติ").orElse(null);
+                type = reportTypeService.getTypeByName("ปกติ");
             }
         }
 
@@ -207,7 +204,7 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public List<ReportResponse> getReportsByRangerUsername(String rangerUsername) {
-        ParkRanger ranger = parkRangerRepository.findByUsername(rangerUsername);
+        ParkRanger ranger = parkRangerService.getParkRangerByUsername(rangerUsername);
         if (ranger != null && ranger.getPark() != null) {
             return getReportsByParkId(ranger.getPark().getParkId());
         }
@@ -236,19 +233,22 @@ public class ReportServiceImpl implements ReportService {
 
         // 1. ค้นหาผู้รับผิดชอบย้อนหลังจากประวัติ Reply หากยังไม่มีการบันทึก
         if (report.getParkRanger() == null) {
-            List<ReplyReport> replies = replyReporyRepository.findAllByReportReportId(report.getReportId());
-            for (ReplyReport rep : replies) {
-                if (rep.getParkRanger() != null) {
-                    report.setParkRanger(rep.getParkRanger());
-                    reportRepository.save(report);
-                    break;
+            List<ReplyReportResponse> replies = replyReportService.getReplyReportByReportId(report.getReportId());
+            for (ReplyReportResponse rep : replies) {
+                if (rep.getParkRangerUsername() != null && !rep.getParkRangerUsername().isBlank()) {
+                    ParkRanger ranger = parkRangerService.getParkRangerByUsername(rep.getParkRangerUsername());
+                    if (ranger != null) {
+                        report.setParkRanger(ranger);
+                        reportRepository.save(report);
+                        break;
+                    }
                 }
             }
         }
 
         ParkRanger currentRanger = null;
         if (rangerUsername != null && !rangerUsername.isBlank()) {
-            currentRanger = parkRangerRepository.findByUsername(rangerUsername.trim());
+            currentRanger = parkRangerService.getParkRangerByUsername(rangerUsername.trim());
         }
 
         // 🔒 2. ตรวจสอบสิทธิ์ผู้รับผิดชอบ:
