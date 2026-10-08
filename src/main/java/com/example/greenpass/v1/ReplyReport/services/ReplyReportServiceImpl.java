@@ -97,8 +97,14 @@ public class ReplyReportServiceImpl implements ReplyReportService {
         String rangerFullName = null;
         String rangerUsername = null;
         if (e.getParkRanger() != null) {
-            rangerFullName = (e.getParkRanger().getFirstname() + " " + e.getParkRanger().getSurname()).trim();
+            String fname = e.getParkRanger().getFirstname() != null ? e.getParkRanger().getFirstname() : "";
+            String sname = e.getParkRanger().getSurname() != null ? e.getParkRanger().getSurname() : "";
+            rangerFullName = (fname + " " + sname).trim();
             rangerUsername = e.getParkRanger().getUsername();
+        }
+        String reportType = null;
+        if (e.getReport() != null && e.getReport().getType() != null) {
+            reportType = e.getReport().getType().getTypeName();
         }
         return ReplyReportResponse.builder()
                 .replyReportId(e.getReplyReportId())
@@ -110,6 +116,7 @@ public class ReplyReportServiceImpl implements ReplyReportService {
                 .image(FileUtils.extractFileName(e.getImage(), "reports"))
                 .parkRangerName(rangerFullName)
                 .parkRangerUsername(rangerUsername)
+                .reportType(reportType)
                 .build();
     }
 
@@ -119,13 +126,8 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     @Override
     public List<ReplyReportResponse> getReplyReportByReportId(int reportId) {
         return replyReporyRepository.findAllByReportReportId(reportId).stream()
-                .map(r -> new ReplyReportResponse(r.getReplyReportId(), r.getReport().getReportId(), r.getUpdateDate(),
-                        r.getUpdateTime(), r.getProgress(), r.getCurrentStatus(),
-                        FileUtils.extractFileName(r.getImage(), "reports"),
-                        r.getParkRanger().getFirstname(), r.getParkRanger().getUsername(),
-                        r.getReport().getType().getTypeName()))
+                .map(this::mapToResponse)
                 .toList();
-
     }
 
     /**
