@@ -3,7 +3,6 @@ package com.example.greenpass.v1.Admin.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +19,11 @@ import com.example.greenpass.v1.Admin.dtos.LoginAdminDto;
 import com.example.greenpass.v1.Admin.dtos.StatisticsResponse;
 import com.example.greenpass.v1.Admin.entities.Admin;
 import com.example.greenpass.v1.Admin.services.AdminService;
-import com.example.greenpass.v1.Announcement.entities.Announcement;
 import com.example.greenpass.v1.Announcement.repositories.AnnouncementRepository;
 import com.example.greenpass.v1.Park.entities.Park;
 import com.example.greenpass.v1.Park.repositories.ParkRepository;
 import com.example.greenpass.v1.ParkRanger.repositories.ParkRangerRepository;
-import com.example.greenpass.v1.Report.entities.Report;
 import com.example.greenpass.v1.Report.repositories.ReportRepository;
-import com.example.greenpass.v1.Stamp.entities.Stamp;
 import com.example.greenpass.v1.Stamp.repositories.StampRepository;
 
 import jakarta.validation.Valid;
@@ -80,8 +76,10 @@ public class AdminController {
             Integer targetYear = (year != null && year > 0) ? (year > 2500 ? year - 543 : year) : null;
             Integer targetMonth = (month != null && month >= 1 && month <= 12) ? month : null;
 
-            // 1. Fetch aggregated stats directly from Database using SQL/JPQL GROUP BY (Blazing Fast!)
-            List<Object[]> newsRows = announcementRepository.countAnnouncementsByParkAndFilters(targetYear, targetMonth);
+            // 1. Fetch aggregated stats directly from Database using SQL/JPQL GROUP BY
+            // (Blazing Fast!)
+            List<Object[]> newsRows = announcementRepository.countAnnouncementsByParkAndFilters(targetYear,
+                    targetMonth);
             List<Object[]> reportRows = reportRepository.countReportsByParkAndFilters(targetYear, targetMonth);
             List<Object[]> visitorRows = stampRepository.countVisitorsByParkAndFilters(targetYear, targetMonth);
 
@@ -165,13 +163,17 @@ public class AdminController {
                         province = sub.split("[\\s,]+")[0];
                     }
                 }
-                
+
                 if ("ทั่วไป".equals(province) || province.isBlank()) {
                     String name = p.getName() != null ? p.getName() : "";
-                    if (name.contains("เขาใหญ่")) province = "นครราชสีมา";
-                    else if (name.contains("แก่งกระจาน")) province = "เพชรบุรี";
-                    else if (name.contains("เอราวัณ")) province = "กาญจนบุรี";
-                    else if (name.contains("ดอยสุเทพ") || name.contains("ดอยอินทนนท์")) province = "เชียงใหม่";
+                    if (name.contains("เขาใหญ่"))
+                        province = "นครราชสีมา";
+                    else if (name.contains("แก่งกระจาน"))
+                        province = "เพชรบุรี";
+                    else if (name.contains("เอราวัณ"))
+                        province = "กาญจนบุรี";
+                    else if (name.contains("ดอยสุเทพ") || name.contains("ดอยอินทนนท์"))
+                        province = "เชียงใหม่";
                 }
 
                 return StatisticsResponse.ParkStatDto.builder()
@@ -188,9 +190,11 @@ public class AdminController {
                         .build();
             }).toList();
 
-            long sumTotalVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getTotalVisitors).sum();
+            long sumTotalVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getTotalVisitors)
+                    .sum();
             long sumThaiVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getThaiVisitors).sum();
-            long sumForeignVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getForeignVisitors).sum();
+            long sumForeignVisitors = parkStats.stream().mapToLong(StatisticsResponse.ParkStatDto::getForeignVisitors)
+                    .sum();
 
             Map<String, Object> metrics = new HashMap<>();
             metrics.put("totalPark", totalPark);
@@ -208,10 +212,12 @@ public class AdminController {
                     .parkStats(parkStats)
                     .build();
 
-            return new ResponseEntity<>(new ResponseObject(true, "Statistics fetched successfully", responseData), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseObject(true, "Statistics fetched successfully", responseData),
+                    HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(new ResponseObject(false, "Failed to fetch statistics", null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ResponseObject(false, "Failed to fetch statistics", null),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-}
+}
