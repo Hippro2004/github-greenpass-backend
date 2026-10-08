@@ -119,8 +119,13 @@ public class ReplyReportServiceImpl implements ReplyReportService {
     @Override
     public List<ReplyReportResponse> getReplyReportByReportId(int reportId) {
         return replyReporyRepository.findAllByReportReportId(reportId).stream()
-                .map(this::mapToResponse)
+                .map(r -> new ReplyReportResponse(r.getReplyReportId(), r.getReport().getReportId(), r.getUpdateDate(),
+                        r.getUpdateTime(), r.getProgress(), r.getCurrentStatus(),
+                        FileUtils.extractFileName(r.getImage(), "reports"),
+                        r.getParkRanger().getFirstname(), r.getParkRanger().getUsername(),
+                        r.getReport().getType().getTypeName()))
                 .toList();
+
     }
 
     /**

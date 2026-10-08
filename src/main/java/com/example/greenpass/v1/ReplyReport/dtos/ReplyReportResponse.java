@@ -22,4 +22,5 @@ public class ReplyReportResponse {
     private String image;
     private String parkRangerName;
     private String parkRangerUsername;
+    private String reporyType;
 }
